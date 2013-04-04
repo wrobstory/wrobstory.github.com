@@ -7,6 +7,8 @@ Tags: python, wind data, pandas,
 I would have a hard time working without the [Pandas](http://pandas.pydata.org/) library at this point. I spend a lot of time munging and anayzing tabular data, and pandas is a critical part of my workflow. I wanted to quickly demonstrate a couple small pieces of code from my side project [climatic](https://github.com/wrobstory/climatic) that show the relative power 
 of pandas, then dive into the guts of what's happening behind the scenes. 
 
+If you are interested in tinkering with the data used in this example, see the [examples](https://github.com/wrobstory/climatic/tree/master/examples) folder in the climatic repo. There are a couple example scripts in there as well that outline how to use climatic to manipulate the data. 
+
 First lets use climatic to import the data via a thin wrapper around pandas read_table that has some column header parsing conveniences: 
 
     ::py

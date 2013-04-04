@@ -51,6 +51,7 @@
 <p>tags: <a href="../../tag/python.html">python</a><a href="../../tag/wind-data.html">wind data</a><a href="../../tag/pandas.html">pandas</a><a href="../../tag/.html"></a></p>
 </footer><!-- /.post-info -->      <p>I would have a hard time working without the <a href="http://pandas.pydata.org/">Pandas</a> library at this point. I spend a lot of time munging and anayzing tabular data, and pandas is a critical part of my workflow. I wanted to quickly demonstrate a couple small pieces of code from my side project <a href="https://github.com/wrobstory/climatic">climatic</a> that show the relative power 
 of pandas, then dive into the guts of what's happening behind the scenes. </p>
+<p>If you are interested in tinkering with the data used in this example, see the <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. There are a couple example scripts in there as well that outline how to use climatic to manipulate the data. </p>
 <p>First lets use climatic to import the data via a thin wrapper around pandas read_table that has some column header parsing conveniences: </p>
 <div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
