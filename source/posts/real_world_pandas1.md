@@ -27,7 +27,7 @@ Climatic will parse the headers into tuples with an attribute and a height, for 
                          plot=('WS Mean 1', 50))
 
 This will give us a matplotlib plot of the WS Mean 1 signal, averaged by sector: 
-![link this](./static/images/frequency_binned.png)
+![freq_rose](http://farm9.staticflickr.com/8242/8618644004_4863172421_o.png)
 
 So, what's happening behind the scenes here? Less than 20 lines of core code make it all happen. First, lets grab a subset of our data to make following this easier, then use numpy to set up a little mapper: 
 
