@@ -24,7 +24,7 @@ Climatic will parse the headers into tuples with an attribute and a height, for 
     ::py
     freq_bins = np.arange(0, 375, 15)
     walsenburg.binned(column=('WD Mean 1', 49), bins=freq_bins, stat='mean', 
-                         plot=('WS Mean 1', 50))
+                      plot=('WS Mean 1', 50))
 
 This will give us a matplotlib plot of the WS Mean 1 signal, averaged by sector: 
 ![freq_rose](http://farm9.staticflickr.com/8242/8618644004_4863172421_o.png)
