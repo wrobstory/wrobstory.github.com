@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 AUTHOR = 'Rob Story'
-SITENAME = "Rob's Blog"
+SITENAME = "wrobstory.github.com"
 SITEURL = 'https://wrobstory.github.com'
 TIMEZONE = 'US/Pacific'
 
