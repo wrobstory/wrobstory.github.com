@@ -164,4 +164,6 @@ of pandas, then dive into the guts of what's happening behind the scenes. &lt;/p
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Ahhhh the magic of Pandas. &lt;/p&gt;</summary><category term="python"></category><category term="wind data"></category><category term="pandas"></category><category term=""></category></entry></feed>
+&lt;p&gt;Ahhhh the magic of Pandas. &lt;/p&gt;</summary><category term="python"></category><category term="wind data"></category><category term="pandas"></category><category term=""></category></entry><entry><title>Getting Started...</title><link href="https://wrobstory.github.com/2013/04/getting-started.html" rel="alternate"></link><updated>2013-04-02T00:00:00-07:00</updated><author><name>Rob Story</name></author><id>tag:https://wrobstory.github.com,2013-04-02:2013/04/getting-started.html</id><summary type="html">&lt;p&gt;Thanks to the handy guide by &lt;a href="http://martinbrochhaus.com/2012/02/pelican.html"&gt;Martin Brochhaus&lt;/a&gt;, I now have a Pelican blog sitting on Github pages. So, thanks to both Martin for the guidance and Github for the hosting. &lt;/p&gt;
+&lt;p&gt;I'm hoping to use this blog to post snippets of Python and Javascript code as I go along, with a heavy emphasis on data analysis using the brilliant &lt;a href="http://pandas.pydata.org/"&gt;Pandas&lt;/a&gt; library and data visualization using &lt;a href="http://d3js.org/"&gt;D3&lt;/a&gt;. &lt;/p&gt;
+&lt;p&gt;So, here goes! &lt;/p&gt;</summary><category term=""></category></entry></feed>
