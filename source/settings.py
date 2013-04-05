@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 AUTHOR = 'Rob Story'
 SITENAME = "wrobstory.github.com"
-SITEURL = 'https://wrobstory.github.com'
+SITEURL = 'http://wrobstory.github.com'
 TIMEZONE = 'US/Pacific'
 
 GITHUB_URL = 'https://github.com/wrobstory'
