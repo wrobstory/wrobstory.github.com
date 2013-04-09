@@ -6,7 +6,7 @@ Tags: python, wind data, pandas,
 
 I forgot to mention in the last post why this series is called Real World Pandas. The Pandas documentation is really, really great, and the examples are exactly what I would want starting out- simple foo/bar/baz type of tables that make it simple to see what transformations are happening. The goal of these blog posts is to show a few examples of "real-world" applications, similar to Wes McKinney's examples in his [book](http://shop.oreilly.com/product/0636920023784.do). A book I highly recommend, btw- not only is the Pandas stuff great, as you would expect, but it has one of the best Python crash courses I've read, as well a great intro to IPython, Numpy, and Matplotlib. I still find myself referencing it. 
 
-Again, if you want to tinker with this data yourself, lets pull in some data from my [examples](https://github.com/wrobstory/climatic/tree/master/examples) folder in the climatic repo. 
+Lets again pull in some data from my [examples](https://github.com/wrobstory/climatic/tree/master/examples) folder in the climatic repo. 
 
     ::py
     import pandas as pd
@@ -25,7 +25,7 @@ Now let's generate a weibull distribution:
 
 This will generate both binned data and a continuous distribution of the WS Mean 1 signal: ![weibull](http://farm9.staticflickr.com/8099/8633712952_49d674672c_o.png)
 
-Lets go behind the scenes again: 
+Going behind the scenes again: 
 
     ::py
     >>>import numpy as np

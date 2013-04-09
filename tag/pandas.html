@@ -46,7 +46,7 @@
         <p>In <a href="../category/blog.html">Blog</a>. </p>
 <p>tags: <a href="../tag/python.html">python</a><a href="../tag/wind-data.html">wind data</a><a href="../tag/pandas.html">pandas</a><a href="../tag/.html"></a></p>
 </footer><!-- /.post-info --><p>I forgot to mention in the last post why this series is called Real World Pandas. The Pandas documentation is really, really great, and the examples are exactly what I would want starting out- simple foo/bar/baz type of tables that make it simple to see what transformations are happening. The goal of these blog posts is to show a few examples of "real-world" applications, similar to Wes McKinney's examples in his <a href="http://shop.oreilly.com/product/0636920023784.do">book</a>. A book I highly recommend, btw- not only is the Pandas stuff great, as you would expect, but it has one of the best Python crash courses I've read, as well a great intro to IPython, Numpy, and Matplotlib. I still find myself referencing it. </p>
-<p>Again, if you want to tinker with this data yourself, lets pull in some data from my <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. </p>
+<p>Lets again pull in some data from my <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. </p>
 <div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">climatic</span> <span class="kn">as</span> <span class="nn">cl</span>
@@ -64,7 +64,7 @@
 
 
 <p>This will generate both binned data and a continuous distribution of the WS Mean 1 signal: <img alt="weibull" src="http://farm9.staticflickr.com/8099/8633712952_49d674672c_o.png" /></p>
-<p>Lets go behind the scenes again: </p>
+<p>Going behind the scenes again: </p>
 <div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="c">#Grab wind speed column</span>
