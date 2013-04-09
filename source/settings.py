@@ -8,6 +8,7 @@ GITHUB_URL = 'https://github.com/wrobstory'
 TWITTER_USERNAME = 'oceankidbilly'
 DEFAULT_CATEGORY = 'Blog'
 THEME = 'notmyidea'
+GOOGLE_ANALYTICS = 'UA-39972069-1'
 
 STATIC_PATHS = ['images', ]
 
