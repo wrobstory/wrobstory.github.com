@@ -1,4 +1,4 @@
-Date: 2013-04-16
+Date: 2013-04-17
 Title: Real world Pandas: Indexing and Plotting with the MultiIndex
 Slug: real-world-pandas-3
 Category: Blog
