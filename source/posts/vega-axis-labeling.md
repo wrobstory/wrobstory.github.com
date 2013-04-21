@@ -2,7 +2,7 @@ Date: 2013-04-21
 Title: Adding axis labels to Vega.js Figures
 Slug: vega-axis-labeling
 Category: Blog
-Tags: python, pandas, vega
+Tags: javascript, vega, vincent
 
 One of the things that took me a bit of time in learning [Vega](https://github.com/trifacta/vega) was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: 
 
