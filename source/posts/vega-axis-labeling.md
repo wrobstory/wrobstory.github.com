@@ -1,8 +1,8 @@
 Date: 2013-04-21
-Title: Adding axis labels to Vega.js Figures
-Slug: vega-axis-labeling
+Title: Vincent: Python DatetimeIndex and Axis/Title labeling
+Slug: vincent-datetimeindex-axes
 Category: Blog
-Tags: javascript, vega, vincent
+Tags: vincent, vega, javascript, python, pandas
 
 One of the things that took me a bit of time in learning [Vega](https://github.com/trifacta/vega) was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: 
 
