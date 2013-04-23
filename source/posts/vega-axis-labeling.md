@@ -1,6 +1,6 @@
-Date: 2013-04-21
-Title: Vincent: Python DatetimeIndex and Axis/Title labeling
-Slug: vincent-datetimeindex-axes
+Date: 2013-04-23
+Title: Vega Axis Labeling
+Slug: vega-axis-labeling
 Category: Blog
 Tags: vincent, vega, javascript, python, pandas
 

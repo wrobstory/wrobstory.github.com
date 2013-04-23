@@ -34,99 +34,77 @@
 
                             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../2013/04/pandas-vincent-timeseries.html">Plotting Time Series with Pandas DatetimeIndex and Vincent</a></h1> 
+                    <h1 class="entry-title"><a href="../2013/04/vega-axis-labeling.html">Vega Axis Labeling</a></h1> 
                     <footer class="post-info">
-        <abbr class="published" title="2013-04-21T00:00:00">
-                Sun 21 April 2013
+        <abbr class="published" title="2013-04-23T00:00:00">
+                Tue 23 April 2013
         </abbr>
 
                 <address class="vcard author">
                 By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
         </address>
         <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a></p>
-</footer><!-- /.post-info --><p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making plot building simple. </p>
-<p>Here are a few quick, easy examples: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">random</span>
+<p>tags: <a href="../tag/vincent.html">vincent</a><a href="../tag/vega.html">vega</a><a href="../tag/javascript.html">javascript</a><a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a></p>
+</footer><!-- /.post-info --><p>One of the things that took me a bit of time in learning <a href="https://github.com/trifacta/vega">Vega</a> was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: </p>
+<div class="codehilite"><pre>    <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Time&#39;</span><span class="p">}]},</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;AAPL Price&#39;</span><span class="p">}]},</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;AAPL Stock Price 1/1/2010-1/1/2013&#39;</span><span class="p">}]}</span>
+      <span class="p">]</span>
 
-<span class="c">#Create a date range and populate it with some random data</span>
-<span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">1441</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">))]</span>
-<span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dates</span><span class="p">)</span>
-
-<span class="c">#Create a vincent line plot, and add your data. Vincent handles the translation </span>
-<span class="c">#of Pandas/Python datetimes to javascript epoch time. </span>
-<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Line</span><span class="p">()</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;day&#39;</span><span class="p">)</span>
-
-<span class="c">#Add interpolation to make our fake data look nice</span>
-<span class="n">vis</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;basis&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> <span class="s">&#39;enter&#39;</span><span class="p">,</span> <span class="s">&#39;interpolate&#39;</span><span class="p">)</span>
-
-<span class="c">#Make the visualization a bit wider, and add axis titles</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">update_vis</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;Data&#39;</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="s">&quot;marks&quot;</span><span class="p">:</span> <span class="p">[</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">35</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">400.0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">}}},</span>
+          <span class="p">},</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;angle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">90</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">45</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">150.0</span><span class="p">}}},</span>
+         <span class="p">},</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">20</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">400.0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}},</span>
+          <span class="p">}</span>
+        <span class="p">]</span>
 </pre></div>
 
 
-<p><img alt="Timeseries" src="http://farm9.staticflickr.com/8533/8668792331_c47f471525_z.jpg" /></p>
-<p>A fully embeddable javascript graph in less than 10 lines of Python- not bad. </p>
-<p>Pandas lets us perform a number of resampling operations on our data: </p>
-<div class="codehilite"><pre><span class="c">#Resample to hourly, which can take a lambda function in addition to the </span>
-<span class="c">#standard mean, max, min, etc. </span>
-<span class="n">half_day</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 12:00:00&#39;</span><span class="p">]</span>
-<span class="n">hourly</span> <span class="o">=</span> <span class="n">half_day</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
-
-<span class="c">#New Area plot</span>
-<span class="n">area</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Area</span><span class="p">()</span>
-<span class="n">area</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">hourly</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;hour&#39;</span><span class="p">)</span>
-<span class="n">area</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;basis&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> <span class="s">&#39;enter&#39;</span><span class="p">,</span> <span class="s">&#39;interpolate&#39;</span><span class="p">)</span>
-<span class="n">area</span><span class="o">.</span><span class="n">update_vis</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">)</span>
-<span class="n">area</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time (Hourly)&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;Data&#39;</span><span class="p">)</span>
-<span class="n">area</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="Area" src="http://farm9.staticflickr.com/8535/8668790817_63f3ef0e87_z.jpg" /></p>
-<p>We can keep sampling to lower resolutions: </p>
-<div class="codehilite"><pre><span class="n">half_hour</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 00:30:00&#39;</span><span class="p">]</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">half_hour</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;minute&#39;</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time (Minutes)&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Data vs. Time&#39;</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="Downsample" src="http://farm9.staticflickr.com/8530/8668790975_49d1f499c6_z.jpg" /></p>
-<p>Finally, we can plot some real data using a little snippet from the <a href="http://shop.oreilly.com/product/0636920023784.do">Python for Data Analysis</a> book: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas.io.data</span> <span class="kn">as</span> <span class="nn">web</span>
-
-<span class="c">#All of the following import code comes from Python for Data Analysis</span>
-<span class="n">all_data</span> <span class="o">=</span> <span class="p">{}</span>
-
-<span class="k">for</span> <span class="n">ticker</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;AAPL&#39;</span><span class="p">,</span> <span class="s">&#39;GOOG&#39;</span><span class="p">]:</span>
-    <span class="n">all_data</span><span class="p">[</span><span class="n">ticker</span><span class="p">]</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">get_data_yahoo</span><span class="p">(</span><span class="n">ticker</span><span class="p">,</span> <span class="s">&#39;1/1/2010&#39;</span><span class="p">,</span> <span class="s">&#39;1/1/2013&#39;</span><span class="p">)</span>
-
-<span class="n">price</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">tic</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Adj Close&#39;</span><span class="p">]</span>
-                      <span class="k">for</span> <span class="n">tic</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">all_data</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()})</span>
-
-<span class="c">#Create line graph, with monthly plotting on the axes                       </span>
-<span class="n">line</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Line</span><span class="p">()</span>
-<span class="n">line</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;AAPL&#39;</span><span class="p">],</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;month&#39;</span><span class="p">)</span>
-<span class="n">line</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-<span class="c">#Play with the axes labels a bit</span>
-<span class="n">line</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;labels&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;angle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">}}},</span> <span class="s">&#39;axes&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">)</span>
-<span class="n">line</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},</span> <span class="s">&#39;axes&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> <span class="s">&#39;labels&#39;</span><span class="p">,</span> <span class="s">&#39;dx&#39;</span><span class="p">)</span>
-<span class="n">line</span><span class="o">.</span><span class="n">update_vis</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">line</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">y_label</span><span class="o">=</span><span class="s">&#39;AAPL Price&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;AAPL Stock Price 1/1/2010-1/1/2013&#39;</span><span class="p">)</span>
-<span class="n">line</span><span class="o">.</span><span class="n">update_vis</span><span class="p">(</span><span class="n">padding</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;bottom&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="s">&#39;left&#39;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s">&#39;top&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">})</span>
-<span class="n">line</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="AAPL" src="http://farm9.staticflickr.com/8537/8669892378_7ed7103e16_z.jpg" /></p>                </article>
+<p>The x and y values on the marks are generally just half of the plot width and height, respectively. You'll need to adjust the padding a bit, but the presets above should provide relatively nice axis titles and labels: </p>
+<p><img alt="Stock plot" src="http://farm9.staticflickr.com/8393/8669181178_e22e576144_z.jpg" /></p>
+<p>Aside: the rest of this plot, including the data pull,  was generated in about 25 lines of Python with <a href="https://github.com/wrobstory/vincent/blob/master/examples/pandas_example.py">Vincent</a>. I'm trying to make Vincent "Vega-for-Humans" as much as possible, so the syntax for generating all of the Vega specs above is: </p>
+<div class="codehilite"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;AAPL Price&#39;</span><span class="p">,</span> 
+                  <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="n">AAPL</span> <span class="n">Stock</span> <span class="n">Price</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="mi">2010</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="mi">2013</span><span class="s">&#39;)</span>
+</pre></div>                </article>
                             </aside><!-- /#featured -->
                             <section id="content" class="body">
                     <h1>Other articles</h1>
@@ -137,8 +115,8 @@
                  
                         <li><article class="hentry">    
                 <header>
-                    <h1><a href="../2013/04/vincent-datetimeindex-axes.html" rel="bookmark"
-                           title="Permalink to Vincent: Python DatetimeIndex and Axis/Title labeling">Vincent: Python DatetimeIndex and Axis/Title labeling</a></h1>
+                    <h1><a href="../2013/04/pandas-vincent-timeseries.html" rel="bookmark"
+                           title="Permalink to Plotting Time Series with Pandas DatetimeIndex and Vincent">Plotting Time Series with Pandas DatetimeIndex and Vincent</a></h1>
                 </header>
                 
                 <div class="entry-content">
@@ -151,12 +129,9 @@
                 By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
         </address>
         <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/vincent.html">vincent</a><a href="../tag/vega.html">vega</a><a href="../tag/javascript.html">javascript</a><a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a></p>
-</footer><!-- /.post-info -->                <p>One of the things that took me a bit of time in learning <a href="https://github.com/trifacta/vega">Vega</a> was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: </p>
-<div class="codehilite"><pre>    <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
-       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Time&#39;</span><span class="p">}]},</span>
-       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label ...</span></pre></div>
-                <a class="readmore" href="../2013/04/vincent-datetimeindex-axes.html">read more</a>
+<p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a></p>
+</footer><!-- /.post-info -->                <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making ...</p>
+                <a class="readmore" href="../2013/04/pandas-vincent-timeseries.html">read more</a>
                                 </div><!-- /.entry-content -->
             </article></li>
                             
