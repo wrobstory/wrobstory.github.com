@@ -26,7 +26,7 @@ The folks at [Quandl](http://www.quandl.com/) have built a nice little [python i
     df_list = []
     for key, value in data.iteritems():
         for state in abbvs:
-            #Grab our data with the Quandl API
+            #Grab our data with the Quandl API 
             quandl_code = 'FRED/{0}{1}'.format(state, value['Code'])
             df = Quandl.get(quandl_code, 
                             authtoken='*******',
@@ -103,7 +103,7 @@ Lots of NaN in that housing data. Let's plot the unemployment data with Vincent 
 quickly: 
 
     :::py
-    vis = vincent.Bar(width=1200)
+    vis = vincent.Bar(width=1200, height=400)
     vis.tabular_data(all_data, columns=['Unemployment'])
     vis.scales.append({'name': 'color', 
                        'domain': {'data': 'table', 'field': 'data.y'},
