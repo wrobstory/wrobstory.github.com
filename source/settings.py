@@ -10,6 +10,9 @@ DEFAULT_CATEGORY = 'Blog'
 THEME = 'notmyidea'
 GOOGLE_ANALYTICS = 'UA-39972069-1'
 
+SOCIAL = (('twitter', 'http://twitter.com/oceankidbilly'),
+          ('github', 'http://github.com/wrobstory'),)
+
 STATIC_PATHS = ['images', ]
 
 

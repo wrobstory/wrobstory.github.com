@@ -34,8 +34,144 @@
 
                             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../2013/04/vincent-ipython.html">Vincent and iPython</a></h1> 
+                    <h1 class="entry-title"><a href="../2013/04/quandl-pandas.html">Quandl and Pandas</a></h1> 
                     <footer class="post-info">
+        <abbr class="published" title="2013-04-27T00:00:00">
+                Sat 27 April 2013
+        </abbr>
+
+                <address class="vcard author">
+                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
+        </address>
+        <p>In <a href="../category/blog.html">Blog</a>. </p>
+<p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a><a href="../tag/quandl.html">quandl</a></p>
+</footer><!-- /.post-info --><p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types of data as the columns. Right now the data is split up on a state-by-state basis (rather than all 50 states as a single table of data), so I wrote a small snippet to grab each state for a given date, then concat them all into a complete Pandas DataFrame: </p>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">Quandl</span>
+<span class="kn">import</span> <span class="nn">vincent</span>
+
+<span class="n">abbvs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;AK&#39;</span><span class="p">,</span> <span class="s">&#39;AZ&#39;</span><span class="p">,</span> <span class="s">&#39;AR&#39;</span><span class="p">,</span> <span class="s">&#39;CA&#39;</span><span class="p">,</span> <span class="s">&#39;CO&#39;</span><span class="p">,</span> <span class="s">&#39;CT&#39;</span><span class="p">,</span> <span class="s">&#39;DE&#39;</span><span class="p">,</span> <span class="s">&#39;FL&#39;</span><span class="p">,</span> <span class="s">&#39;GA&#39;</span><span class="p">,</span> <span class="s">&#39;HI&#39;</span><span class="p">,</span> <span class="s">&#39;ID&#39;</span><span class="p">,</span>
+         <span class="s">&#39;IL&#39;</span><span class="p">,</span> <span class="s">&#39;IN&#39;</span><span class="p">,</span> <span class="s">&#39;IA&#39;</span><span class="p">,</span> <span class="s">&#39;KS&#39;</span><span class="p">,</span> <span class="s">&#39;KY&#39;</span><span class="p">,</span> <span class="s">&#39;LA&#39;</span><span class="p">,</span> <span class="s">&#39;ME&#39;</span><span class="p">,</span> <span class="s">&#39;MD&#39;</span><span class="p">,</span> <span class="s">&#39;MA&#39;</span><span class="p">,</span> <span class="s">&#39;MI&#39;</span><span class="p">,</span> <span class="s">&#39;MN&#39;</span><span class="p">,</span> 
+         <span class="s">&#39;MS&#39;</span><span class="p">,</span> <span class="s">&#39;MO&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">,</span> <span class="s">&#39;NE&#39;</span><span class="p">,</span> <span class="s">&#39;NV&#39;</span><span class="p">,</span> <span class="s">&#39;NH&#39;</span><span class="p">,</span> <span class="s">&#39;NJ&#39;</span><span class="p">,</span> <span class="s">&#39;NM&#39;</span><span class="p">,</span> <span class="s">&#39;NY&#39;</span><span class="p">,</span> <span class="s">&#39;NC&#39;</span><span class="p">,</span> <span class="s">&#39;ND&#39;</span><span class="p">,</span> 
+         <span class="s">&#39;OH&#39;</span><span class="p">,</span> <span class="s">&#39;OK&#39;</span><span class="p">,</span> <span class="s">&#39;OR&#39;</span><span class="p">,</span> <span class="s">&#39;PA&#39;</span><span class="p">,</span> <span class="s">&#39;RI&#39;</span><span class="p">,</span> <span class="s">&#39;SC&#39;</span><span class="p">,</span> <span class="s">&#39;SD&#39;</span><span class="p">,</span> <span class="s">&#39;TN&#39;</span><span class="p">,</span> <span class="s">&#39;TX&#39;</span><span class="p">,</span> <span class="s">&#39;UT&#39;</span><span class="p">,</span> <span class="s">&#39;VT&#39;</span><span class="p">,</span> 
+         <span class="s">&#39;VA&#39;</span><span class="p">,</span> <span class="s">&#39;WA&#39;</span><span class="p">,</span> <span class="s">&#39;WV&#39;</span><span class="p">,</span> <span class="s">&#39;WI&#39;</span><span class="p">,</span> <span class="s">&#39;WY&#39;</span><span class="p">]</span>
+
+<span class="c">#Set up dict with Dataset names, Quandl Codes, and empty lists for our data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Unemployment&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;UR&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]},</span> 
+        <span class="s">&#39;House Price Index&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;STHPI&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]}}</span>
+<span class="n">date</span> <span class="o">=</span> <span class="s">&#39;2012-10-01&#39;</span>
+
+<span class="c">#Will populate the list with 1-line DataFrames, then concat the pieces in the end</span>
+<span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">abbvs</span><span class="p">:</span>
+        <span class="c">#Grab our data with the Quandl API</span>
+        <span class="n">quandl_code</span> <span class="o">=</span> <span class="s">&#39;FRED/{0}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="s">&#39;Code&#39;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">Quandl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quandl_code</span><span class="p">,</span> 
+                        <span class="n">authtoken</span><span class="o">=</span><span class="s">&#39;*******&#39;</span><span class="p">,</span>
+                        <span class="n">startdate</span><span class="o">=</span><span class="n">date</span><span class="p">,</span>
+                        <span class="n">enddate</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
+
+        <span class="c">#The data defaults to date- since I&#39;m only grabbing one month, I would</span>
+        <span class="c">#rather have the data category as the (after I transpose) column name</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Value&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">},</span> 
+                       <span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">):</span> <span class="n">key</span><span class="p">})</span>              
+        <span class="n">value</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c">#Take the data for each state, stack them into one dataframe column</span>
+    <span class="n">stacked</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stacked</span>
+    <span class="n">df_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stacked</span><span class="p">)</span>
+
+<span class="c">#Turn two single-column &#39;Unemployment&#39; and &#39;House Price Index&#39; df&#39;s into one    </span>
+<span class="n">all_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span><span class="n">all_data</span>
+        <span class="n">House</span> <span class="n">Price</span> <span class="n">Index</span>  <span class="n">Unemployment</span>
+    <span class="n">AK</span>             <span class="mf">289.32</span>           <span class="mf">6.8</span>
+    <span class="n">AZ</span>             <span class="mf">258.33</span>           <span class="mf">8.1</span>
+    <span class="n">AR</span>             <span class="mf">245.78</span>           <span class="mf">7.2</span>
+    <span class="n">CA</span>             <span class="mf">405.78</span>          <span class="mf">10.1</span>
+    <span class="n">CO</span>             <span class="mf">345.98</span>           <span class="mf">7.7</span>
+    <span class="n">CT</span>             <span class="mf">392.27</span>           <span class="mf">8.4</span>
+    <span class="n">DE</span>             <span class="mf">407.31</span>           <span class="mf">7.1</span>
+    <span class="n">FL</span>             <span class="mf">280.15</span>           <span class="mf">8.2</span>
+    <span class="n">GA</span>             <span class="mf">258.18</span>           <span class="mf">8.8</span>
+    <span class="n">HI</span>             <span class="mf">456.91</span>           <span class="mf">5.4</span>
+    <span class="n">ID</span>             <span class="mf">266.10</span>           <span class="mf">6.6</span>
+    <span class="n">IL</span>             <span class="mf">303.92</span>           <span class="mf">8.8</span>
+    <span class="n">IN</span>             <span class="mf">244.66</span>           <span class="mf">8.4</span>
+    <span class="n">IA</span>             <span class="mf">251.59</span>           <span class="mf">5.1</span>
+    <span class="n">KS</span>             <span class="mf">234.53</span>           <span class="mf">5.6</span>
+    <span class="n">KY</span>                <span class="n">NaN</span>           <span class="mf">8.1</span>
+    <span class="n">LA</span>             <span class="mf">245.82</span>           <span class="mf">5.9</span>
+    <span class="n">ME</span>             <span class="mf">452.29</span>           <span class="mf">7.2</span>
+    <span class="n">MD</span>             <span class="mf">407.38</span>           <span class="mf">6.8</span>
+    <span class="n">MA</span>                <span class="n">NaN</span>           <span class="mf">6.7</span>
+    <span class="n">MI</span>                <span class="n">NaN</span>           <span class="mf">9.1</span>
+    <span class="n">MN</span>                <span class="n">NaN</span>           <span class="mf">5.6</span>
+    <span class="n">MS</span>             <span class="mf">239.13</span>           <span class="mf">9.1</span>
+    <span class="n">MO</span>                <span class="n">NaN</span>           <span class="mf">6.7</span>
+    <span class="n">MT</span>                <span class="n">NaN</span>           <span class="mf">5.8</span>
+    <span class="n">NE</span>                <span class="n">NaN</span>           <span class="mf">3.9</span>
+    <span class="n">NV</span>             <span class="mf">191.11</span>          <span class="mf">10.3</span>
+    <span class="n">NH</span>             <span class="mf">392.91</span>           <span class="mf">5.7</span>
+    <span class="n">NJ</span>             <span class="mf">458.39</span>           <span class="mf">9.6</span>
+    <span class="n">NM</span>                <span class="n">NaN</span>           <span class="mf">6.8</span>
+    <span class="n">NY</span>                <span class="n">NaN</span>           <span class="mf">8.4</span>
+    <span class="n">NC</span>                <span class="n">NaN</span>           <span class="mf">9.4</span>
+    <span class="n">ND</span>                <span class="n">NaN</span>           <span class="mf">3.2</span>
+    <span class="n">OH</span>             <span class="mf">239.16</span>           <span class="mf">6.9</span>
+    <span class="n">OK</span>                <span class="n">NaN</span>           <span class="mf">5.2</span>
+    <span class="n">OR</span>             <span class="mf">357.07</span>           <span class="mf">8.5</span>
+    <span class="n">PA</span>             <span class="mf">367.16</span>           <span class="mf">8.0</span>
+    <span class="n">RI</span>                <span class="n">NaN</span>          <span class="mf">10.1</span>
+    <span class="n">SC</span>             <span class="mf">305.20</span>           <span class="mf">8.8</span>
+    <span class="n">SD</span>             <span class="mf">301.00</span>           <span class="mf">4.4</span>
+    <span class="n">TN</span>                <span class="n">NaN</span>           <span class="mf">7.8</span>
+    <span class="n">TX</span>                <span class="n">NaN</span>           <span class="mf">6.4</span>
+    <span class="n">UT</span>             <span class="mf">316.56</span>           <span class="mf">5.5</span>
+    <span class="n">VT</span>             <span class="mf">442.03</span>           <span class="mf">5.0</span>
+    <span class="n">VA</span>             <span class="mf">397.53</span>           <span class="mf">5.8</span>
+    <span class="n">WA</span>             <span class="mf">392.27</span>           <span class="mf">7.8</span>
+    <span class="n">WV</span>             <span class="mf">215.77</span>           <span class="mf">7.5</span>
+    <span class="n">WI</span>             <span class="mf">296.69</span>           <span class="mf">6.8</span>
+    <span class="n">WY</span>             <span class="mf">277.86</span>           <span class="mf">5.1</span>
+</pre></div>
+
+
+<p>Lots of NaN in that housing data. Let's plot the unemployment data with Vincent really
+quickly: </p>
+<div class="codehilite"><pre><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Unemployment&#39;</span><span class="p">])</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> 
+                   <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;table&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span>
+                   <span class="s">&#39;range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;#0b0d11&#39;</span><span class="p">,</span> <span class="s">&#39;#6a7a9d&#39;</span><span class="p">]})</span>
+<span class="n">vis</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> 
+       <span class="s">&#39;update&#39;</span><span class="p">,</span> <span class="s">&#39;fill&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;US States&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;Unemployment %&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="Unemployment" src="http://farm8.staticflickr.com/7050/8688377072_a4158fd998_z.jpg" /></p>
+<p>Sorry about the small axis labels- I think I need to find a wider blog template (or stop trying to make ordinal plots with 50 items...)</p>                </article>
+                            </aside><!-- /#featured -->
+                            <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+                                                
+
+                 
+                        <li><article class="hentry">    
+                <header>
+                    <h1><a href="../2013/04/vincent-ipython.html" rel="bookmark"
+                           title="Permalink to Vincent and iPython">Vincent and iPython</a></h1>
+                </header>
+                
+                <div class="entry-content">
+                <footer class="post-info">
         <abbr class="published" title="2013-04-23T00:00:00">
                 Tue 23 April 2013
         </abbr>
@@ -45,27 +181,18 @@
         </address>
         <p>In <a href="../category/blog.html">Blog</a>. </p>
 <p>tags: <a href="../tag/python.html">python</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a><a href="../tag/ipython.html">ipython</a></p>
-</footer><!-- /.post-info --><p>Thanks to the work of <a href="https://twitter.com/healthyalgo">Abraham Flaxman</a><a href="https://github.com/aflaxman">(github)</a>, Vincent now supports iPython plotting, with just two additional lines of initialization required: </p>
+</footer><!-- /.post-info -->                <p>Thanks to the work of <a href="https://twitter.com/healthyalgo">Abraham Flaxman</a><a href="https://github.com/aflaxman">(github)</a>, Vincent now supports iPython plotting, with just two additional lines of initialization required: </p>
 <div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
 <span class="n">vincent</span><span class="o">.</span><span class="n">ipynb_init_d3</span><span class="p">()</span>
 <span class="n">vincent</span><span class="o">.</span><span class="n">ipynb_init_vg</span><span class="p">()</span>
 
 <span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">()</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(((</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="mi">55</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="mi">43</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;D&#39;</span><span class="p">,</span> <span class="mi">91</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;E&#39;</span><span class="p">,</span> <span class="mi">81</span><span class="p">),</span> 
-                  <span class="p">(</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="mi">53</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="mi">87</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="mi">52</span><span class="p">)))</span>
-<span class="n">vincent</span><span class="o">.</span><span class="n">ipynb_display</span><span class="p">(</span><span class="n">vis</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="ipython" src="http://farm9.staticflickr.com/8262/8677332204_7d11fc0364_z.jpg" />. </p>
-<p>Unfortunately, js embeds like this don't play nice with nbviewer- to see it in action, go grab the <a href="https://github.com/wrobstory/vincent/tree/master/examples">example</a> and run it on a local server. </p>
-<p>I also recommend checking out Abraham's <a href="http://healthyalgorithms.com/">blog</a>, where he has some most excellent pixellated carrots. </p>                </article>
-                            </aside><!-- /#featured -->
-                            <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
-                                                
+                  <span class="p">(</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="mi">53</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="mi">87</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="mi">52 ...</span></pre></div>
+                <a class="readmore" href="../2013/04/vincent-ipython.html">read more</a>
+                                </div><!-- /.entry-content -->
+            </article></li>
+                            
 
                  
                         <li><article class="hentry">    
@@ -95,7 +222,16 @@
     </p>
                         </section><!-- /#content -->
                     <section id="extras" class="body">
-                        </section><!-- /#extras -->
+                                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+                            <li><a href="http://wrobstory.github.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+                            
+                                                    <li><a href="http://twitter.com/oceankidbilly">twitter</a></li>
+                                                    <li><a href="http://github.com/wrobstory">github</a></li>
+                                                </ul>
+                </div><!-- /.social -->
+                </section><!-- /#extras -->
 
         <footer id="contentinfo" class="body">
                 <address id="about" class="vcard body">
