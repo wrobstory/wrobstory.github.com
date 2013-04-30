@@ -34,7 +34,7 @@
 
                             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../2013/04/python-maps-chloropleth.html">Creating Map Visualizations in <10 lines of Python</a></h1> 
+                    <h1 class="entry-title"><a href="../2013/04/python-maps-choropleth.html">Creating Map Visualizations in <10 lines of Python</a></h1> 
                     <footer class="post-info">
         <abbr class="published" title="2013-04-29T00:00:00">
                 Mon 29 April 2013
@@ -72,7 +72,7 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 
 
 <p><img alt="USA Map" src="http://farm9.staticflickr.com/8389/8690908267_d7a3a83dae_z.jpg" /></p>
-<p>Additionally, chloropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: </p>
+<p>Additionally, choropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: </p>
 <div class="codehilite"><pre><span class="c">#&#39;merged&#39; is the Pandas DataFrame</span>
 <span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Unemployment_rate_2011&#39;</span><span class="p">])</span> 

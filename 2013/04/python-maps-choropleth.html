@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <title>wrobstory.github.com - python</title>
+        <title>Creating Map Visualizations in <10 lines of Python</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="../theme/css/main.css" type="text/css" />
+        <link rel="stylesheet" href="../../theme/css/main.css" type="text/css" />
                 <link href="http://wrobstory.github.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="wrobstory.github.com Atom Feed" />
                 
         <!--[if IE]>
                 <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
         <!--[if lte IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="../css/ie.css"/>
-                <script src="../js/IE8.js" type="text/javascript"></script><![endif]-->
+                <link rel="stylesheet" type="text/css" media="all" href="../../css/ie.css"/>
+                <script src="../../js/IE8.js" type="text/javascript"></script><![endif]-->
 
         <!--[if lt IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="../css/ie6.css"/><![endif]-->
+                <link rel="stylesheet" type="text/css" media="all" href="../../css/ie6.css"/><![endif]-->
 
 </head>
 
@@ -23,29 +23,33 @@
 <img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" />
 </a>
         <header id="banner" class="body">
-                <h1><a href="../">wrobstory.github.com </a></h1>
+                <h1><a href="../../">wrobstory.github.com </a></h1>
                 <nav><ul>
                                     <li><a href="http://wrobstory.github.com/archives.html">Archives</a></li>
-                                                                                                    <li ><a href="../category/blog.html">Blog</a></li>
+                                                                                                    <li class="active"><a href="../../category/blog.html">Blog</a></li>
                                 </ul></nav>
         </header><!-- /#banner -->
-                
-            
+        <section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="../../2013/04/python-maps-choropleth.html" rel="bookmark"
+           title="Permalink to Creating Map Visualizations in <10 lines of Python">Creating Map Visualizations in <10 lines of Python</a></h1>
+      <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="oceankidbilly">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    </header>
 
-                            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="../2013/04/python-maps-choropleth.html">Creating Map Visualizations in <10 lines of Python</a></h1> 
-                    <footer class="post-info">
+    <div class="entry-content">
+      <footer class="post-info">
         <abbr class="published" title="2013-04-29T00:00:00">
                 Mon 29 April 2013
         </abbr>
 
                 <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
+                By <a class="url fn" href="../../author/rob-story.html">Rob Story</a>
         </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/maps.html">maps</a><a href="../tag/vincent.html">vincent</a></p>
-</footer><!-- /.post-info --><div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
+        <p>In <a href="../../category/blog.html">Blog</a>. </p>
+<p>tags: <a href="../../tag/python.html">python</a><a href="../../tag/maps.html">maps</a><a href="../../tag/vincent.html">vincent</a></p>
+</footer><!-- /.post-info -->      <div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
 <span class="n">world_countries</span> <span class="o">=</span> <span class="s">r&#39;world-countries.json&#39;</span>
 <span class="n">world</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">world</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;winkel3&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">world</span><span class="o">=</span><span class="n">world_countries</span><span class="p">)</span>
@@ -177,125 +181,12 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 
 
 <p><img alt="State Unemployment" src="http://farm9.staticflickr.com/8541/8695302818_4c83792642_z.jpg" /></p>
-<p>Maps are a passion of mine- this is one area where I really want to make Vincent very strong, including the ability to easily add points, markers, etc. If you the reader have any features you would like to see with regarding to mapping, please post an issue on <a href="https://github.com/wrobstory/vincent/issues">Github</a></p>                </article>
-                            </aside><!-- /#featured -->
-                            <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
-                                                
-
-                 
-                        <li><article class="hentry">    
-                <header>
-                    <h1><a href="../2013/04/quandl-pandas.html" rel="bookmark"
-                           title="Permalink to Quandl and Pandas">Quandl and Pandas</a></h1>
-                </header>
-                
-                <div class="entry-content">
-                <footer class="post-info">
-        <abbr class="published" title="2013-04-27T00:00:00">
-                Sat 27 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a><a href="../tag/quandl.html">quandl</a></p>
-</footer><!-- /.post-info -->                <p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types ...</p>
-                <a class="readmore" href="../2013/04/quandl-pandas.html">read more</a>
-                                </div><!-- /.entry-content -->
-            </article></li>
-                            
-
-                 
-                        <li><article class="hentry">    
-                <header>
-                    <h1><a href="../2013/04/vega-axis-labeling.html" rel="bookmark"
-                           title="Permalink to Vega Axis Labeling">Vega Axis Labeling</a></h1>
-                </header>
-                
-                <div class="entry-content">
-                <footer class="post-info">
-        <abbr class="published" title="2013-04-23T00:00:00">
-                Tue 23 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/vincent.html">vincent</a><a href="../tag/vega.html">vega</a><a href="../tag/javascript.html">javascript</a><a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a></p>
-</footer><!-- /.post-info -->                <p>One of the things that took me a bit of time in learning <a href="https://github.com/trifacta/vega">Vega</a> was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: </p>
-<div class="codehilite"><pre>    <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
-       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Time&#39;</span><span class="p">}]},</span>
-       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label ...</span></pre></div>
-                <a class="readmore" href="../2013/04/vega-axis-labeling.html">read more</a>
-                                </div><!-- /.entry-content -->
-            </article></li>
-                            
-
-                 
-                        <li><article class="hentry">    
-                <header>
-                    <h1><a href="../2013/04/vincent-ipython.html" rel="bookmark"
-                           title="Permalink to Vincent and iPython">Vincent and iPython</a></h1>
-                </header>
-                
-                <div class="entry-content">
-                <footer class="post-info">
-        <abbr class="published" title="2013-04-23T00:00:00">
-                Tue 23 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a><a href="../tag/ipython.html">ipython</a></p>
-</footer><!-- /.post-info -->                <p>Thanks to the work of <a href="https://twitter.com/healthyalgo">Abraham Flaxman</a><a href="https://github.com/aflaxman">(github)</a>, Vincent now supports iPython plotting, with just two additional lines of initialization required: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
-<span class="n">vincent</span><span class="o">.</span><span class="n">ipynb_init_d3</span><span class="p">()</span>
-<span class="n">vincent</span><span class="o">.</span><span class="n">ipynb_init_vg</span><span class="p">()</span>
-
-<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">()</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(((</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;B&#39;</span><span class="p">,</span> <span class="mi">55</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="mi">43</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;D&#39;</span><span class="p">,</span> <span class="mi">91</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;E&#39;</span><span class="p">,</span> <span class="mi">81</span><span class="p">),</span> 
-                  <span class="p">(</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="mi">53</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;G&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="mi">87</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="mi">52 ...</span></pre></div>
-                <a class="readmore" href="../2013/04/vincent-ipython.html">read more</a>
-                                </div><!-- /.entry-content -->
-            </article></li>
-                            
-
-                 
-                        <li><article class="hentry">    
-                <header>
-                    <h1><a href="../2013/04/pandas-vincent-timeseries.html" rel="bookmark"
-                           title="Permalink to Plotting Time Series with Pandas DatetimeIndex and Vincent">Plotting Time Series with Pandas DatetimeIndex and Vincent</a></h1>
-                </header>
-                
-                <div class="entry-content">
-                <footer class="post-info">
-        <abbr class="published" title="2013-04-21T00:00:00">
-                Sun 21 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a></p>
-</footer><!-- /.post-info -->                <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making ...</p>
-                <a class="readmore" href="../2013/04/pandas-vincent-timeseries.html">read more</a>
-                                </div><!-- /.entry-content -->
-            </article></li>
-                            </ol><!-- /#posts-list -->
-                            <p class="paginator">
-        Page 1 / 2
-            <a href="../tag/python2.html">&raquo;</a>
-    </p>
-                        </section><!-- /#content -->
-                    <section id="extras" class="body">
+<p>Maps are a passion of mine- this is one area where I really want to make Vincent very strong, including the ability to easily add points, markers, etc. If you the reader have any features you would like to see with regarding to mapping, please post an issue on <a href="https://github.com/wrobstory/vincent/issues">Github</a></p>
+    </div><!-- /.entry-content -->
+    
+  </article>
+</section>
+        <section id="extras" class="body">
                                 <div class="social">
                         <h2>social</h2>
                         <ul>

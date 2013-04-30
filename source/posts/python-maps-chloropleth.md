@@ -1,6 +1,6 @@
 Date: 2013-04-29
 Title: Creating Map Visualizations in <10 lines of Python
-Slug: python-maps-chloropleth
+Slug: python-maps-choropleth
 Category: Blog
 Tags: python, maps, vincent
 
@@ -32,7 +32,7 @@ For instance, layering sets of map data in order to create more complex maps:
     
 ![USA Map](http://farm9.staticflickr.com/8389/8690908267_d7a3a83dae_z.jpg)
 
-Additionally, chloropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: 
+Additionally, choropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: 
 
     :::py
     #'merged' is the Pandas DataFrame
