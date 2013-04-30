@@ -1,6 +1,6 @@
 Date: 2013-04-29
 Title: Creating Map Visualizations in <10 lines of Python
-Slug: python-maps-choropleth
+Slug: python-maps-chloropleth
 Category: Blog
 Tags: python, maps, vincent
 
@@ -111,7 +111,7 @@ We need to match the FIPS codes and ensure that the matches are exact, or Vega w
     3                                      90.2  
     4                                     101.2 
     
-And now we can quickly generate different chloropleths: 
+And now we can quickly generate different choropleths: 
 
     :::py
     vis.tabular_data(merged, columns=['FIPS_Code', 'Civilian_labor_force_2011']) 

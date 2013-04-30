@@ -76,7 +76,7 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 
 
 <p><img alt="USA Map" src="http://farm9.staticflickr.com/8389/8690908267_d7a3a83dae_z.jpg" /></p>
-<p>Additionally, chloropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: </p>
+<p>Additionally, choropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: </p>
 <div class="codehilite"><pre><span class="c">#&#39;merged&#39; is the Pandas DataFrame</span>
 <span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Unemployment_rate_2011&#39;</span><span class="p">])</span> 
@@ -155,7 +155,7 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 </pre></div>
 
 
-<p>And now we can quickly generate different chloropleths: </p>
+<p>And now we can quickly generate different choropleths: </p>
 <div class="codehilite"><pre><span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Civilian_labor_force_2011&#39;</span><span class="p">])</span> 
 <span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 </pre></div>
