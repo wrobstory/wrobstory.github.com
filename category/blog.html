@@ -34,8 +34,164 @@
 
                             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../2013/04/quandl-pandas.html">Quandl and Pandas</a></h1> 
+                    <h1 class="entry-title"><a href="../2013/04/python-maps-chloropleth.html">Maps and Chloropleths in <10 lines of Python</a></h1> 
                     <footer class="post-info">
+        <abbr class="published" title="2013-04-29T00:00:00">
+                Mon 29 April 2013
+        </abbr>
+
+                <address class="vcard author">
+                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
+        </address>
+        <p>In <a href="../category/blog.html">Blog</a>. </p>
+<p>tags: <a href="../tag/python.html">python</a><a href="../tag/maps.html">maps</a><a href="../tag/vincent.html">vincent</a></p>
+</footer><!-- /.post-info --><div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
+<span class="n">world_countries</span> <span class="o">=</span> <span class="s">r&#39;world-countries.json&#39;</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">world</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;winkel3&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">world</span><span class="o">=</span><span class="n">world_countries</span><span class="p">)</span>
+<span class="n">world</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="World" src="http://farm9.staticflickr.com/8394/8695267202_89da3761d7_z.jpg" />  </p>
+<p>One of my goals when I started building <a href="https://github.com/wrobstory/vincent">Vincent</a> was to streamline the
+creation of maps as much as possible. There are some excellent Python map libraries out there- see <a href="https://github.com/matplotlib/basemap">Basemap</a> and <a href="https://github.com/kartograph/kartograph.py">Kartograph</a> for
+more fun with maps. I highly recommend both of those tools, as they are both quite good and very powerful. I 
+wanted something a little simpler, that relies on the power of <a href="http://trifacta.github.io/vega/">Vega</a> and allows for simple syntax- point to geoJSON files, specify a projection and scale/size, output the map.</p>
+<p>For instance, layering sets of map data in order to create more complex maps: </p>
+<div class="codehilite"><pre><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="c">#Add the US county data and a new line color</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">counties</span><span class="o">=</span><span class="n">county_geo</span><span class="p">)</span>
+<span class="n">vis</span> <span class="o">+</span> <span class="p">(</span><span class="s">&#39;2B4ECF&#39;</span><span class="p">,</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> <span class="s">&#39;enter&#39;</span><span class="p">,</span> <span class="s">&#39;stroke&#39;</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">)</span>
+
+<span class="c">#Add the state data, remove the fill, write Vega spec output to JSON</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="n">state_geo</span><span class="p">)</span>
+<span class="n">vis</span> <span class="o">-</span> <span class="p">(</span><span class="s">&#39;fill&#39;</span><span class="p">,</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> <span class="s">&#39;enter&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="USA Map" src="http://farm9.staticflickr.com/8389/8690908267_d7a3a83dae_z.jpg" /></p>
+<p>Additionally, chloropleth maps were begging for a binding to the Pandas DataFrame, with data columns mapping directly to map features. Assuming a 1:1 mapping from geoJSON features to column data, the syntax is very straightforward: </p>
+<div class="codehilite"><pre><span class="c">#&#39;merged&#39; is the Pandas DataFrame</span>
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Unemployment_rate_2011&#39;</span><span class="p">])</span> 
+<span class="n">vis</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">bind_data</span><span class="o">=</span><span class="s">&#39;data.id&#39;</span><span class="p">,</span> <span class="n">counties</span><span class="o">=</span><span class="n">county_geo</span><span class="p">)</span>
+<span class="n">vis</span> <span class="o">+</span> <span class="p">([</span><span class="s">&quot;#f5f5f5&quot;</span><span class="p">,</span><span class="s">&quot;#000045&quot;</span><span class="p">],</span> <span class="s">&#39;scales&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="Chloropleth" src="http://farm9.staticflickr.com/8543/8692026644_a1ee888398_z.jpg" /></p>
+<p>This isn't without a little data wrangling and transformation- the user needs to ensure that there is a 1:1 mapping of keys in the geoJSON to row keys in the Pandas DataFrame. Here is what was required to get a clean DataFrame for mapping for the previous example: our county data is a csv with <a href="http://en.wikipedia.org/wiki/Federal_Information_Processing_Standard">FIPS</a> code, county name, and our economic data (column names withheld): </p>
+<div class="codehilite"><pre><span class="mo">00000</span><span class="p">,</span><span class="n">US</span><span class="p">,</span><span class="n">United</span> <span class="n">States</span><span class="p">,</span><span class="mi">154505871</span><span class="p">,</span><span class="mi">140674478</span><span class="p">,</span><span class="mi">13831393</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">50502</span><span class="p">,</span><span class="mi">100</span>
+<span class="mo">01000</span><span class="p">,</span><span class="n">AL</span><span class="p">,</span><span class="n">Alabama</span><span class="p">,</span><span class="mi">2190519</span><span class="p">,</span><span class="mi">1993977</span><span class="p">,</span><span class="mi">196542</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">41427</span><span class="p">,</span><span class="mi">100</span>
+<span class="mo">01001</span><span class="p">,</span><span class="n">AL</span><span class="p">,</span><span class="n">Autauga</span> <span class="n">County</span><span class="p">,</span><span class="mi">25930</span><span class="p">,</span><span class="mi">23854</span><span class="p">,</span><span class="mi">2076</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">48863</span><span class="p">,</span><span class="mf">117.9</span>
+<span class="mo">01003</span><span class="p">,</span><span class="n">AL</span><span class="p">,</span><span class="n">Baldwin</span> <span class="n">County</span><span class="p">,</span><span class="mi">85407</span><span class="p">,</span><span class="mi">78491</span><span class="p">,</span><span class="mi">6916</span><span class="p">,</span><span class="mf">8.1</span><span class="p">,</span><span class="mi">50144</span><span class="p">,</span><span class="mi">121</span>
+<span class="mo">01005</span><span class="p">,</span><span class="n">AL</span><span class="p">,</span><span class="n">Barbour</span> <span class="n">County</span><span class="p">,</span><span class="mi">9761</span><span class="p">,</span><span class="mi">8651</span><span class="p">,</span><span class="mi">1110</span><span class="p">,</span><span class="mf">11.4</span><span class="p">,</span><span class="mi">30117</span><span class="p">,</span><span class="mf">72.7</span>
+</pre></div>
+
+
+<p>And our county polygons in a geoJSON with FIPS codes as the id's (thanks to the folks at <a href="http://trifacta.github.io/vega/">Trifacta</a> for this data). The actual polygons have been truncated here for brevity, see the <a href="https://github.com/wrobstory/vincent/tree/master/examples/data">example data</a> for the complete dataset: </p>
+<div class="codehilite"><pre><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span><span class="nt">&quot;features&quot;</span><span class="p">:[</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1001&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Autauga&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1003&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Baldwin&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1005&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Barbour&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1007&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Bibb&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1009&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Blount&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1011&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Bullock&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1013&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Butler&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1015&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Calhoun&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1017&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Chambers&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1019&quot;</span><span class="p">,</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Cherokee&quot;</span><span class="p">}</span>
+</pre></div>
+
+
+<p>We need to match the FIPS codes and ensure that the matches are exact, or Vega won't zip the data properly: </p>
+<div class="codehilite"><pre><span class="c">#Map the county codes we have in our geometry to those in the</span>
+<span class="c">#county_data file, which contains additional rows we don&#39;t need</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">county_geo</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">get_id</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c">#Grab the FIPS codes and load them into a dataframe</span>
+<span class="n">county_codes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">get_id</span><span class="p">[</span><span class="s">&#39;features&#39;</span><span class="p">]]</span>
+<span class="n">county_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">:</span> <span class="n">county_codes</span><span class="p">},</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="c">#Read into Dataframe, cast to string for consistency</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">county_data</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s">&#39; &#39;</span><span class="p">])</span>
+<span class="n">df</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="c">#Perform an inner join, pad NA&#39;s with data from nearest county</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">county_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s">&#39;inner&#39;</span><span class="p">)</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;pad&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span><span class="n">merged</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+      <span class="n">FIPS_Code</span> <span class="n">State</span>       <span class="n">Area_name</span>  <span class="n">Civilian_labor_force_2011</span>  <span class="n">Employed_2011</span>  \
+    <span class="mi">0</span>      <span class="mi">1001</span>    <span class="n">AL</span>  <span class="n">Autauga</span> <span class="n">County</span>                      <span class="mi">25930</span>          <span class="mi">23854</span>   
+    <span class="mi">1</span>      <span class="mi">1003</span>    <span class="n">AL</span>  <span class="n">Baldwin</span> <span class="n">County</span>                      <span class="mi">85407</span>          <span class="mi">78491</span>   
+    <span class="mi">2</span>      <span class="mi">1005</span>    <span class="n">AL</span>  <span class="n">Barbour</span> <span class="n">County</span>                       <span class="mi">9761</span>           <span class="mi">8651</span>   
+    <span class="mi">3</span>      <span class="mi">1007</span>    <span class="n">AL</span>     <span class="n">Bibb</span> <span class="n">County</span>                       <span class="mi">9216</span>           <span class="mi">8303</span>   
+    <span class="mi">4</span>      <span class="mi">1009</span>    <span class="n">AL</span>   <span class="n">Blount</span> <span class="n">County</span>                      <span class="mi">26347</span>          <span class="mi">24156</span>
+
+   <span class="n">Unemployed_2011</span>  <span class="n">Unemployment_rate_2011</span>  <span class="n">Median_Household_Income_2011</span>  \
+<span class="mi">0</span>             <span class="mi">2076</span>                     <span class="mf">8.0</span>                         <span class="mi">48863</span>   
+<span class="mi">1</span>             <span class="mi">6916</span>                     <span class="mf">8.1</span>                         <span class="mi">50144</span>   
+<span class="mi">2</span>             <span class="mi">1110</span>                    <span class="mf">11.4</span>                         <span class="mi">30117</span>   
+<span class="mi">3</span>              <span class="mi">913</span>                     <span class="mf">9.9</span>                         <span class="mi">37347</span>   
+<span class="mi">4</span>             <span class="mi">2191</span>                     <span class="mf">8.3</span>                         <span class="mi">41940</span>
+
+   <span class="n">Med_HH_Income_Percent_of_StateTotal_2011</span>  
+<span class="mi">0</span>                                     <span class="mf">117.9</span>  
+<span class="mi">1</span>                                     <span class="mf">121.0</span>  
+<span class="mi">2</span>                                      <span class="mf">72.7</span>  
+<span class="mi">3</span>                                      <span class="mf">90.2</span>  
+<span class="mi">4</span>                                     <span class="mf">101.2</span>
+</pre></div>
+
+
+<p>And now we can quickly generate different chloropleths: </p>
+<div class="codehilite"><pre><span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Civilian_labor_force_2011&#39;</span><span class="p">])</span> 
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="Labor Force" src="http://farm9.staticflickr.com/8545/8694182969_9a6e04fe92_z.jpg" /></p>
+<p>That's not telling us much other than that LA and King counties are both very large and very populous. Let's look at median household income: </p>
+<div class="codehilite"><pre><span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FIPS_Code&#39;</span><span class="p">,</span> <span class="s">&#39;Median_Household_Income_2011&#39;</span><span class="p">])</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="Median Income" src="http://farm9.staticflickr.com/8536/8694183111_c2c80516df_z.jpg" /></p>
+<p>Certainly some high income areas on the east coast and in other high density areas. I bet this would be more interesting on the city level, but that will have to wait for a future post. Lets quickly reset the map and look at state unemployment: </p>
+<div class="codehilite"><pre><span class="c">#Swap county data for state data, reset map</span>
+<span class="n">state_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">state_unemployment</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">state_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;State&#39;</span><span class="p">,</span> <span class="s">&#39;Unemployment&#39;</span><span class="p">])</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">bind_data</span><span class="o">=</span><span class="s">&#39;data.id&#39;</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">state_geo</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">update_map</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">)</span>
+<span class="n">vis</span> <span class="o">+</span> <span class="p">([</span><span class="s">&#39;#c9cedb&#39;</span><span class="p">,</span> <span class="s">&#39;#0b0d11&#39;</span><span class="p">],</span> <span class="s">&#39;scales&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;range&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="State Unemployment" src="http://farm9.staticflickr.com/8541/8695302818_4c83792642_z.jpg" /></p>
+<p>Maps are a passion of mine- this is one area where I really want to make Vincent very strong, including the ability to easily add points, markers, etc. If you the reader have any features you would like to see with regarding to mapping, please post an issue on <a href="https://github.com/wrobstory/vincent/issues">Github</a></p>                </article>
+                            </aside><!-- /#featured -->
+                            <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+                                                
+
+                 
+                        <li><article class="hentry">    
+                <header>
+                    <h1><a href="../2013/04/quandl-pandas.html" rel="bookmark"
+                           title="Permalink to Quandl and Pandas">Quandl and Pandas</a></h1>
+                </header>
+                
+                <div class="entry-content">
+                <footer class="post-info">
         <abbr class="published" title="2013-04-27T00:00:00">
                 Sat 27 April 2013
         </abbr>
@@ -45,123 +201,11 @@
         </address>
         <p>In <a href="../category/blog.html">Blog</a>. </p>
 <p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a><a href="../tag/quandl.html">quandl</a></p>
-</footer><!-- /.post-info --><p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types of data as the columns. Right now the data is split up on a state-by-state basis (rather than all 50 states as a single table of data), so I wrote a small snippet to grab each state for a given date, then concat them all into a complete Pandas DataFrame: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">Quandl</span>
-<span class="kn">import</span> <span class="nn">vincent</span>
-
-<span class="n">abbvs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;AK&#39;</span><span class="p">,</span> <span class="s">&#39;AZ&#39;</span><span class="p">,</span> <span class="s">&#39;AR&#39;</span><span class="p">,</span> <span class="s">&#39;CA&#39;</span><span class="p">,</span> <span class="s">&#39;CO&#39;</span><span class="p">,</span> <span class="s">&#39;CT&#39;</span><span class="p">,</span> <span class="s">&#39;DE&#39;</span><span class="p">,</span> <span class="s">&#39;FL&#39;</span><span class="p">,</span> <span class="s">&#39;GA&#39;</span><span class="p">,</span> <span class="s">&#39;HI&#39;</span><span class="p">,</span> <span class="s">&#39;ID&#39;</span><span class="p">,</span>
-         <span class="s">&#39;IL&#39;</span><span class="p">,</span> <span class="s">&#39;IN&#39;</span><span class="p">,</span> <span class="s">&#39;IA&#39;</span><span class="p">,</span> <span class="s">&#39;KS&#39;</span><span class="p">,</span> <span class="s">&#39;KY&#39;</span><span class="p">,</span> <span class="s">&#39;LA&#39;</span><span class="p">,</span> <span class="s">&#39;ME&#39;</span><span class="p">,</span> <span class="s">&#39;MD&#39;</span><span class="p">,</span> <span class="s">&#39;MA&#39;</span><span class="p">,</span> <span class="s">&#39;MI&#39;</span><span class="p">,</span> <span class="s">&#39;MN&#39;</span><span class="p">,</span> 
-         <span class="s">&#39;MS&#39;</span><span class="p">,</span> <span class="s">&#39;MO&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">,</span> <span class="s">&#39;NE&#39;</span><span class="p">,</span> <span class="s">&#39;NV&#39;</span><span class="p">,</span> <span class="s">&#39;NH&#39;</span><span class="p">,</span> <span class="s">&#39;NJ&#39;</span><span class="p">,</span> <span class="s">&#39;NM&#39;</span><span class="p">,</span> <span class="s">&#39;NY&#39;</span><span class="p">,</span> <span class="s">&#39;NC&#39;</span><span class="p">,</span> <span class="s">&#39;ND&#39;</span><span class="p">,</span> 
-         <span class="s">&#39;OH&#39;</span><span class="p">,</span> <span class="s">&#39;OK&#39;</span><span class="p">,</span> <span class="s">&#39;OR&#39;</span><span class="p">,</span> <span class="s">&#39;PA&#39;</span><span class="p">,</span> <span class="s">&#39;RI&#39;</span><span class="p">,</span> <span class="s">&#39;SC&#39;</span><span class="p">,</span> <span class="s">&#39;SD&#39;</span><span class="p">,</span> <span class="s">&#39;TN&#39;</span><span class="p">,</span> <span class="s">&#39;TX&#39;</span><span class="p">,</span> <span class="s">&#39;UT&#39;</span><span class="p">,</span> <span class="s">&#39;VT&#39;</span><span class="p">,</span> 
-         <span class="s">&#39;VA&#39;</span><span class="p">,</span> <span class="s">&#39;WA&#39;</span><span class="p">,</span> <span class="s">&#39;WV&#39;</span><span class="p">,</span> <span class="s">&#39;WI&#39;</span><span class="p">,</span> <span class="s">&#39;WY&#39;</span><span class="p">]</span>
-
-<span class="c">#Set up dict with Dataset names, Quandl Codes, and empty lists for our data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Unemployment&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;UR&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]},</span> 
-        <span class="s">&#39;House Price Index&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;STHPI&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]}}</span>
-<span class="n">date</span> <span class="o">=</span> <span class="s">&#39;2012-10-01&#39;</span>
-
-<span class="c">#Will populate the list with 1-line DataFrames, then concat the pieces in the end</span>
-<span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">abbvs</span><span class="p">:</span>
-        <span class="c">#Grab our data with the Quandl API </span>
-        <span class="n">quandl_code</span> <span class="o">=</span> <span class="s">&#39;FRED/{0}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="s">&#39;Code&#39;</span><span class="p">])</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">Quandl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quandl_code</span><span class="p">,</span> 
-                        <span class="n">authtoken</span><span class="o">=</span><span class="s">&#39;*******&#39;</span><span class="p">,</span>
-                        <span class="n">startdate</span><span class="o">=</span><span class="n">date</span><span class="p">,</span>
-                        <span class="n">enddate</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
-
-        <span class="c">#The data defaults to date- since I&#39;m only grabbing one month, I would</span>
-        <span class="c">#rather have the data category as the (after I transpose) column name</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Value&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">},</span> 
-                       <span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">):</span> <span class="n">key</span><span class="p">})</span>              
-        <span class="n">value</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-
-    <span class="c">#Take the data for each state, stack them into one dataframe column</span>
-    <span class="n">stacked</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
-    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stacked</span>
-    <span class="n">df_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stacked</span><span class="p">)</span>
-
-<span class="c">#Turn two single-column &#39;Unemployment&#39; and &#39;House Price Index&#39; df&#39;s into one    </span>
-<span class="n">all_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="o">&gt;&gt;&gt;</span><span class="n">all_data</span>
-        <span class="n">House</span> <span class="n">Price</span> <span class="n">Index</span>  <span class="n">Unemployment</span>
-    <span class="n">AK</span>             <span class="mf">289.32</span>           <span class="mf">6.8</span>
-    <span class="n">AZ</span>             <span class="mf">258.33</span>           <span class="mf">8.1</span>
-    <span class="n">AR</span>             <span class="mf">245.78</span>           <span class="mf">7.2</span>
-    <span class="n">CA</span>             <span class="mf">405.78</span>          <span class="mf">10.1</span>
-    <span class="n">CO</span>             <span class="mf">345.98</span>           <span class="mf">7.7</span>
-    <span class="n">CT</span>             <span class="mf">392.27</span>           <span class="mf">8.4</span>
-    <span class="n">DE</span>             <span class="mf">407.31</span>           <span class="mf">7.1</span>
-    <span class="n">FL</span>             <span class="mf">280.15</span>           <span class="mf">8.2</span>
-    <span class="n">GA</span>             <span class="mf">258.18</span>           <span class="mf">8.8</span>
-    <span class="n">HI</span>             <span class="mf">456.91</span>           <span class="mf">5.4</span>
-    <span class="n">ID</span>             <span class="mf">266.10</span>           <span class="mf">6.6</span>
-    <span class="n">IL</span>             <span class="mf">303.92</span>           <span class="mf">8.8</span>
-    <span class="n">IN</span>             <span class="mf">244.66</span>           <span class="mf">8.4</span>
-    <span class="n">IA</span>             <span class="mf">251.59</span>           <span class="mf">5.1</span>
-    <span class="n">KS</span>             <span class="mf">234.53</span>           <span class="mf">5.6</span>
-    <span class="n">KY</span>                <span class="n">NaN</span>           <span class="mf">8.1</span>
-    <span class="n">LA</span>             <span class="mf">245.82</span>           <span class="mf">5.9</span>
-    <span class="n">ME</span>             <span class="mf">452.29</span>           <span class="mf">7.2</span>
-    <span class="n">MD</span>             <span class="mf">407.38</span>           <span class="mf">6.8</span>
-    <span class="n">MA</span>                <span class="n">NaN</span>           <span class="mf">6.7</span>
-    <span class="n">MI</span>                <span class="n">NaN</span>           <span class="mf">9.1</span>
-    <span class="n">MN</span>                <span class="n">NaN</span>           <span class="mf">5.6</span>
-    <span class="n">MS</span>             <span class="mf">239.13</span>           <span class="mf">9.1</span>
-    <span class="n">MO</span>                <span class="n">NaN</span>           <span class="mf">6.7</span>
-    <span class="n">MT</span>                <span class="n">NaN</span>           <span class="mf">5.8</span>
-    <span class="n">NE</span>                <span class="n">NaN</span>           <span class="mf">3.9</span>
-    <span class="n">NV</span>             <span class="mf">191.11</span>          <span class="mf">10.3</span>
-    <span class="n">NH</span>             <span class="mf">392.91</span>           <span class="mf">5.7</span>
-    <span class="n">NJ</span>             <span class="mf">458.39</span>           <span class="mf">9.6</span>
-    <span class="n">NM</span>                <span class="n">NaN</span>           <span class="mf">6.8</span>
-    <span class="n">NY</span>                <span class="n">NaN</span>           <span class="mf">8.4</span>
-    <span class="n">NC</span>                <span class="n">NaN</span>           <span class="mf">9.4</span>
-    <span class="n">ND</span>                <span class="n">NaN</span>           <span class="mf">3.2</span>
-    <span class="n">OH</span>             <span class="mf">239.16</span>           <span class="mf">6.9</span>
-    <span class="n">OK</span>                <span class="n">NaN</span>           <span class="mf">5.2</span>
-    <span class="n">OR</span>             <span class="mf">357.07</span>           <span class="mf">8.5</span>
-    <span class="n">PA</span>             <span class="mf">367.16</span>           <span class="mf">8.0</span>
-    <span class="n">RI</span>                <span class="n">NaN</span>          <span class="mf">10.1</span>
-    <span class="n">SC</span>             <span class="mf">305.20</span>           <span class="mf">8.8</span>
-    <span class="n">SD</span>             <span class="mf">301.00</span>           <span class="mf">4.4</span>
-    <span class="n">TN</span>                <span class="n">NaN</span>           <span class="mf">7.8</span>
-    <span class="n">TX</span>                <span class="n">NaN</span>           <span class="mf">6.4</span>
-    <span class="n">UT</span>             <span class="mf">316.56</span>           <span class="mf">5.5</span>
-    <span class="n">VT</span>             <span class="mf">442.03</span>           <span class="mf">5.0</span>
-    <span class="n">VA</span>             <span class="mf">397.53</span>           <span class="mf">5.8</span>
-    <span class="n">WA</span>             <span class="mf">392.27</span>           <span class="mf">7.8</span>
-    <span class="n">WV</span>             <span class="mf">215.77</span>           <span class="mf">7.5</span>
-    <span class="n">WI</span>             <span class="mf">296.69</span>           <span class="mf">6.8</span>
-    <span class="n">WY</span>             <span class="mf">277.86</span>           <span class="mf">5.1</span>
-</pre></div>
-
-
-<p>Lots of NaN in that housing data. Let's plot the unemployment data with Vincent really
-quickly: </p>
-<div class="codehilite"><pre><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Unemployment&#39;</span><span class="p">])</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> 
-                   <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;table&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span>
-                   <span class="s">&#39;range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;#0b0d11&#39;</span><span class="p">,</span> <span class="s">&#39;#6a7a9d&#39;</span><span class="p">]})</span>
-<span class="n">vis</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> 
-       <span class="s">&#39;update&#39;</span><span class="p">,</span> <span class="s">&#39;fill&#39;</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;US States&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;Unemployment %&#39;</span><span class="p">)</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="Unemployment" src="http://farm8.staticflickr.com/7050/8688377072_a4158fd998_z.jpg" /></p>
-<p>Sorry about the small axis labels- I think I need to find a wider blog template (or stop trying to make ordinal plots with 50 items...)</p>                </article>
-                            </aside><!-- /#featured -->
-                            <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
-                                                
+</footer><!-- /.post-info -->                <p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types ...</p>
+                <a class="readmore" href="../2013/04/quandl-pandas.html">read more</a>
+                                </div><!-- /.entry-content -->
+            </article></li>
+                            
 
                  
                         <li><article class="hentry">    
@@ -241,30 +285,6 @@ quickly: </p>
 <p>tags: <a href="../tag/python.html">python</a><a href="../tag/pandas.html">pandas</a><a href="../tag/vincent.html">vincent</a><a href="../tag/data.html">data</a></p>
 </footer><!-- /.post-info -->                <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making ...</p>
                 <a class="readmore" href="../2013/04/pandas-vincent-timeseries.html">read more</a>
-                                </div><!-- /.entry-content -->
-            </article></li>
-                            
-
-                 
-                        <li><article class="hentry">    
-                <header>
-                    <h1><a href="../2013/04/real-world-pandas-3.html" rel="bookmark"
-                           title="Permalink to Real world Pandas: Indexing and Plotting with the MultiIndex">Real world Pandas: Indexing and Plotting with the MultiIndex</a></h1>
-                </header>
-                
-                <div class="entry-content">
-                <footer class="post-info">
-        <abbr class="published" title="2013-04-17T00:00:00">
-                Wed 17 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../tag/python.html">python</a><a href="../tag/wind-data.html">wind data</a><a href="../tag/pandas.html">pandas</a><a href="../tag/.html"></a></p>
-</footer><!-- /.post-info -->                <p>The MultiIndex is one of the most valuable tools in the Pandas library, particularly if you are working with data that's heavy on columns and attributes. I was going to tackle Panels as well this time (as they can complement MultiIndexing in many ways), but the next version on ...</p>
-                <a class="readmore" href="../2013/04/real-world-pandas-3.html">read more</a>
                                 </div><!-- /.entry-content -->
             </article></li>
                             </ol><!-- /#posts-list -->
