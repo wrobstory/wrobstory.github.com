@@ -1,5 +1,5 @@
 Date: 2013-04-29
-Title: Maps and Chloropleths in <10 lines of Python
+Title: Creating beautiful maps in <10 lines of Python
 Slug: python-maps-chloropleth
 Category: Blog
 Tags: python, maps, vincent
