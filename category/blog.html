@@ -108,7 +108,9 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 
 
 <p>We need to match the FIPS codes and ensure that the matches are exact, or Vega won't zip the data properly: </p>
-<div class="codehilite"><pre><span class="c">#Map the county codes we have in our geometry to those in the</span>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="c">#Map the county codes we have in our geometry to those in the</span>
 <span class="c">#county_data file, which contains additional rows we don&#39;t need</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">county_geo</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">get_id</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>

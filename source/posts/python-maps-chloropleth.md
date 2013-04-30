@@ -70,6 +70,8 @@ And our county polygons in a geoJSON with FIPS codes as the id's (thanks to the 
 We need to match the FIPS codes and ensure that the matches are exact, or Vega won't zip the data properly: 
 
     :::py
+    import json
+    import pandas as pd
     #Map the county codes we have in our geometry to those in the
     #county_data file, which contains additional rows we don't need
     with open(county_geo, 'r') as f:

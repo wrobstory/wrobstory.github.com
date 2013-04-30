@@ -62,7 +62,9 @@ wanted something a little simpler, that relies on the power of &lt;a href="http:
 
 
 &lt;p&gt;We need to match the FIPS codes and ensure that the matches are exact, or Vega won't zip the data properly: &lt;/p&gt;
-&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="c"&gt;#Map the county codes we have in our geometry to those in the&lt;/span&gt;
+&lt;div class="codehilite"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+&lt;span class="c"&gt;#Map the county codes we have in our geometry to those in the&lt;/span&gt;
 &lt;span class="c"&gt;#county_data file, which contains additional rows we don&amp;#39;t need&lt;/span&gt;
 &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;county_geo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;r&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;get_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
