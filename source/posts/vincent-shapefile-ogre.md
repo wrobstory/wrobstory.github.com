@@ -6,7 +6,7 @@ Tags: python, maps, vincent, Ogre
 
 Vincent now supports spatial file conversion via the [Ogre](http://ogre.adc4gis.com/) web tool. Here is a quick example for some shapefiles- the syntax is almost exactly the same as building a normal map, except now you need to pass one additional keyword argument to perform the conversion to geoJSON so that Vincent/Vega can parse it properly. 
 
-All of the following data was downloaded from the awesome folks at [Natural Earth](http://www.naturalearthdata.com/), who provide free vector and raster map data, with all sorts of cultural/physical datasets. 
+All of the following data was downloaded from the awesome folks at [Natural Earth](http://www.naturalearthdata.com/), who provide free vector and raster map data, with all sorts of cultural/physical datasets. In this example, I'm using the zipped shapefiles straight from NE; if you're using your own shapefiles, you need to ensure that the .shp, .dbf, and .shx files are all in the zip. 
 
 Lets quickly make a map with oceans, land and lakes: 
 
