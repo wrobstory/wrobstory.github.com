@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Real world Pandas: Binning and Grouping | wrobstory.github.com </title>
+
+    <link rel="stylesheet" href="./theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="./theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="./theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+                    
+      <div class=navigation>
+        <ul>
+                      <li><a href="./index.html">Blog</a> </li>
+                      <li><a href="./archives.html">Archive</a> </li>
+                      <li><a href="./tags.html">Tags</a> </li>
+                  </ul>
+      </div>
+      <div class=separator></div>                
+        <div class=body>
+            <h1 class="title"> Real world Pandas: Binning and Grouping</h1>
+    <p class=date> Wed 03 April 2013 </p>
+    <p>I would have a hard time working without the <a href="http://pandas.pydata.org/">Pandas</a> library at this point. I spend a lot of time munging and anayzing tabular data, and pandas is a critical part of my workflow. I wanted to quickly demonstrate a couple small pieces of code from my side project <a href="https://github.com/wrobstory/climatic">climatic</a> that show the relative power 
+of pandas, then dive into the guts of what's happening behind the scenes. </p>
+<p>If you are interested in tinkering with the data used in this example, see the <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. There are a couple example scripts in there as well that outline how to use climatic to manipulate the data. </p>
+<p>First lets use climatic to import the data via a thin wrapper around pandas read_table that has some column header parsing conveniences: </p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">climatic</span> <span class="kn">as</span> <span class="nn">cl</span>
+
+<span class="n">walsenburg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">MetMast</span><span class="p">()</span>
+<span class="n">walsenburg</span><span class="o">.</span><span class="n">wind_import</span><span class="p">(</span><span class="s">r&#39;CO_Walsenburg_South_Data.txt&#39;</span><span class="p">,</span> 
+                       <span class="n">header_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                       <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">smart_headers</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Climatic will parse the headers into tuples with an attribute and a height, for manipulating later with a pandas MultiIndex. Next, lets bin all of the data by wind frequency:</p>
+<div class="highlight"><pre><span class="n">freq_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">375</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+<span class="n">walsenburg</span><span class="o">.</span><span class="n">binned</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;WD Mean 1&#39;</span><span class="p">,</span> <span class="mi">49</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">freq_bins</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">,</span> 
+                  <span class="n">plot</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+</pre></div>
+
+
+<p>This will give us a matplotlib plot of the WS Mean 1 signal, averaged by sector: 
+<img alt="freq_rose" src="http://farm9.staticflickr.com/8242/8618644004_4863172421_o.png" /></p>
+<p>So, what's happening behind the scenes here? Less than 20 lines of core code make it all happen. First, lets grab a subset of our data to make following this easier, then use numpy to set up a little mapper: </p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c">#Turn a few columns into a new DataFrame</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;Wind Speed 1&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span> 
+                     <span class="s">&#39;Wind Speed 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 2&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span> 
+                     <span class="s">&#39;Wind Dir 1&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WD Mean 1&#39;</span><span class="p">,</span> <span class="mf">49.0</span><span class="p">)],</span>
+                     <span class="s">&#39;Wind Dir 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WD Mean 2&#39;</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">)]},</span> 
+                     <span class="n">index</span><span class="o">=</span><span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c">#Write a short mapper that bins data</span>
+<span class="k">def</span> <span class="nf">map_bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="nb">bin</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">bins</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">bin_lower</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">bins</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s">&#39;[{0}-{1}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_lower</span><span class="p">,</span> <span class="nb">bin</span><span class="p">)</span>
+</pre></div>
+
+
+<p>np.digitize is doing our heavy lifting, by bracketing our x value in the bin. The kwargs are necessary in order to address the edge case where x and the max bin are the same, and thus to include it we need to set right=True in np.digitize.</p>
+<p>Lets check our mapper: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">map_bin</span><span class="p">(</span><span class="mi">274</span><span class="p">,</span> <span class="n">freq_bins</span><span class="p">)</span>
+<span class="s">&#39;[270-285]&#39;</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">map_bin</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">freq_bins</span><span class="p">)</span> <span class="c">#np.digitize defaults to right=False</span>
+<span class="s">&#39;[60-75]&#39;</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">map_bin</span><span class="p">(</span><span class="mi">360</span><span class="p">,</span> <span class="n">freq_bins</span><span class="p">)</span> <span class="c">#Edge case works!</span>
+<span class="s">&#39;[345-360]&#39;</span>
+</pre></div>
+
+
+<p>Now lets map it to our data:</p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+                         <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                                                      
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>         <span class="mi">261</span>         <span class="mf">12.05</span>         <span class="mf">12.26</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">244</span>         <span class="mi">258</span>         <span class="mf">11.48</span>         <span class="mf">11.60</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>         <span class="mi">260</span>         <span class="mf">14.19</span>         <span class="mf">14.39</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">249</span>         <span class="mi">268</span>         <span class="mf">13.21</span>         <span class="mf">13.43</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">246</span>         <span class="mi">263</span>         <span class="mf">11.92</span>         <span class="mf">12.12</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">235</span>         <span class="mi">255</span>         <span class="mf">11.90</span>         <span class="mf">12.05</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">232</span>         <span class="mi">249</span>         <span class="mf">12.78</span>         <span class="mf">12.92</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">234</span>         <span class="mi">252</span>         <span class="mf">13.27</span>         <span class="mf">13.40</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">234</span>         <span class="mi">252</span>         <span class="mf">14.05</span>         <span class="mf">14.24</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">233</span>         <span class="mi">251</span>         <span class="mf">13.32</span>         <span class="mf">13.48</span>
+
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span> <span class="c">#The mapper won&#39;t be happy with NA values</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Binned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Wind Dir 1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">map_bin</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">freq_bins</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[[</span><span class="s">&#39;Wind Dir 1&#39;</span><span class="p">,</span><span class="s">&#39;Binned&#39;</span><span class="p">]][:</span><span class="mi">10</span><span class="p">]</span>
+                         <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>     <span class="n">Binned</span>
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                         
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">244</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">249</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">246</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">235</span>  <span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">232</span>  <span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">234</span>  <span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">234</span>  <span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">233</span>  <span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>
+</pre></div>
+
+
+<p>Finally, lets group the data by 'Binned' and average the data for each bin: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">grouped</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s">&#39;Binned&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span> 
+               <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
+<span class="n">Binned</span>                                                       
+<span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>       <span class="mf">6.822575</span>   <span class="mf">31.094926</span>      <span class="mf">4.573297</span>      <span class="mf">4.371899</span>
+<span class="p">[</span><span class="mi">105</span><span class="o">-</span><span class="mi">120</span><span class="p">]</span>  <span class="mf">111.928729</span>  <span class="mf">132.076001</span>      <span class="mf">5.626556</span>      <span class="mf">6.024371</span>
+<span class="p">[</span><span class="mi">120</span><span class="o">-</span><span class="mi">135</span><span class="p">]</span>  <span class="mf">126.822383</span>  <span class="mf">146.176534</span>      <span class="mf">5.613520</span>      <span class="mf">5.835964</span>
+<span class="p">[</span><span class="mi">135</span><span class="o">-</span><span class="mi">150</span><span class="p">]</span>  <span class="mf">141.683526</span>  <span class="mf">162.210983</span>      <span class="mf">5.617823</span>      <span class="mf">5.780949</span>
+<span class="p">[</span><span class="mi">15</span><span class="o">-</span><span class="mi">30</span><span class="p">]</span>     <span class="mf">21.533770</span>   <span class="mf">45.891117</span>      <span class="mf">4.295620</span>      <span class="mf">4.198170</span>
+
+<span class="c">#Close, but lets rearrange that index...</span>
+
+<span class="o">&gt;&gt;&gt;</span><span class="n">step</span> <span class="o">=</span> <span class="n">freq_bins</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">freq_bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">new_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;[{0}-{1}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">freq_bins</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">new_index</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c">#We dont need [360-375]...</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span> <span class="o">=</span> <span class="n">grouped_data</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+
+            <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
+<span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>       <span class="mf">6.822575</span>   <span class="mf">31.094926</span>      <span class="mf">4.573297</span>      <span class="mf">4.371899</span>
+<span class="p">[</span><span class="mi">15</span><span class="o">-</span><span class="mi">30</span><span class="p">]</span>     <span class="mf">21.533770</span>   <span class="mf">45.891117</span>      <span class="mf">4.295620</span>      <span class="mf">4.198170</span>
+<span class="p">[</span><span class="mi">30</span><span class="o">-</span><span class="mi">45</span><span class="p">]</span>     <span class="mf">37.047317</span>   <span class="mf">59.679583</span>      <span class="mf">3.927675</span>      <span class="mf">3.960149</span>
+<span class="p">[</span><span class="mi">45</span><span class="o">-</span><span class="mi">60</span><span class="p">]</span>     <span class="mf">51.892241</span>   <span class="mf">74.951293</span>      <span class="mf">3.900810</span>      <span class="mf">4.004444</span>
+<span class="p">[</span><span class="mi">60</span><span class="o">-</span><span class="mi">75</span><span class="p">]</span>     <span class="mf">66.828717</span>   <span class="mf">88.899354</span>      <span class="mf">4.207535</span>      <span class="mf">4.362599</span>
+<span class="p">[</span><span class="mi">75</span><span class="o">-</span><span class="mi">90</span><span class="p">]</span>     <span class="mf">82.212025</span>  <span class="mf">102.702532</span>      <span class="mf">4.536062</span>      <span class="mf">4.788042</span>
+<span class="p">[</span><span class="mi">90</span><span class="o">-</span><span class="mi">105</span><span class="p">]</span>    <span class="mf">97.385444</span>  <span class="mf">117.748979</span>      <span class="mf">5.149796</span>      <span class="mf">5.516673</span>
+<span class="p">[</span><span class="mi">105</span><span class="o">-</span><span class="mi">120</span><span class="p">]</span>  <span class="mf">111.928729</span>  <span class="mf">132.076001</span>      <span class="mf">5.626556</span>      <span class="mf">6.024371</span>
+<span class="p">[</span><span class="mi">120</span><span class="o">-</span><span class="mi">135</span><span class="p">]</span>  <span class="mf">126.822383</span>  <span class="mf">146.176534</span>      <span class="mf">5.613520</span>      <span class="mf">5.835964</span>
+<span class="p">[</span><span class="mi">135</span><span class="o">-</span><span class="mi">150</span><span class="p">]</span>  <span class="mf">141.683526</span>  <span class="mf">162.210983</span>      <span class="mf">5.617823</span>      <span class="mf">5.780949</span>
+<span class="p">[</span><span class="mi">150</span><span class="o">-</span><span class="mi">165</span><span class="p">]</span>  <span class="mf">157.483837</span>  <span class="mf">176.898332</span>      <span class="mf">6.887868</span>      <span class="mf">6.971621</span>
+<span class="p">[</span><span class="mi">165</span><span class="o">-</span><span class="mi">180</span><span class="p">]</span>  <span class="mf">171.589352</span>  <span class="mf">188.888889</span>      <span class="mf">7.188426</span>      <span class="mf">7.194069</span>
+<span class="p">[</span><span class="mi">180</span><span class="o">-</span><span class="mi">195</span><span class="p">]</span>  <span class="mf">187.002382</span>  <span class="mf">203.015485</span>      <span class="mf">5.355545</span>      <span class="mf">5.407082</span>
+<span class="p">[</span><span class="mi">195</span><span class="o">-</span><span class="mi">210</span><span class="p">]</span>  <span class="mf">202.717400</span>  <span class="mf">219.100039</span>      <span class="mf">5.571109</span>      <span class="mf">5.657147</span>
+<span class="p">[</span><span class="mi">210</span><span class="o">-</span><span class="mi">225</span><span class="p">]</span>  <span class="mf">218.342431</span>  <span class="mf">232.987274</span>      <span class="mf">7.196849</span>      <span class="mf">7.313788</span>
+<span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>  <span class="mf">232.394529</span>  <span class="mf">247.631333</span>      <span class="mf">9.423809</span>      <span class="mf">9.594018</span>
+<span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>  <span class="mf">247.634660</span>  <span class="mf">262.238499</span>      <span class="mf">9.388131</span>      <span class="mf">9.605217</span>
+<span class="p">[</span><span class="mi">255</span><span class="o">-</span><span class="mi">270</span><span class="p">]</span>  <span class="mf">260.905513</span>  <span class="mf">277.101137</span>      <span class="mf">7.559757</span>      <span class="mf">7.802381</span>
+<span class="p">[</span><span class="mi">270</span><span class="o">-</span><span class="mi">285</span><span class="p">]</span>  <span class="mf">276.039922</span>  <span class="mf">291.899464</span>      <span class="mf">5.941962</span>      <span class="mf">6.203880</span>
+<span class="p">[</span><span class="mi">285</span><span class="o">-</span><span class="mi">300</span><span class="p">]</span>  <span class="mf">291.521139</span>  <span class="mf">306.436152</span>      <span class="mf">4.164875</span>      <span class="mf">4.377459</span>
+<span class="p">[</span><span class="mi">300</span><span class="o">-</span><span class="mi">315</span><span class="p">]</span>  <span class="mf">307.145844</span>  <span class="mf">319.766446</span>      <span class="mf">3.795752</span>      <span class="mf">3.990653</span>
+<span class="p">[</span><span class="mi">315</span><span class="o">-</span><span class="mi">330</span><span class="p">]</span>  <span class="mf">322.087945</span>  <span class="mf">332.487648</span>      <span class="mf">4.263681</span>      <span class="mf">4.391398</span>
+<span class="p">[</span><span class="mi">330</span><span class="o">-</span><span class="mi">345</span><span class="p">]</span>  <span class="mf">337.370640</span>  <span class="mf">294.193944</span>      <span class="mf">5.160487</span>      <span class="mf">5.229559</span>
+<span class="p">[</span><span class="mi">345</span><span class="o">-</span><span class="mi">360</span><span class="p">]</span>  <span class="mf">352.397252</span>   <span class="mf">34.222820</span>      <span class="mf">4.973387</span>      <span class="mf">4.941254</span>
+</pre></div>
+
+
+<p>Voila! All of the data has been grouped by frequency, taking a mean of the data within any one bin. We could have also grouped by max: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">grouped_max</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+               <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
+<span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>             <span class="mi">14</span>         <span class="mi">359</span>         <span class="mf">19.67</span>         <span class="mf">18.40</span>
+<span class="p">[</span><span class="mi">15</span><span class="o">-</span><span class="mi">30</span><span class="p">]</span>            <span class="mi">29</span>         <span class="mi">358</span>         <span class="mf">13.87</span>         <span class="mf">13.40</span>
+<span class="p">[</span><span class="mi">30</span><span class="o">-</span><span class="mi">45</span><span class="p">]</span>            <span class="mi">44</span>         <span class="mi">359</span>         <span class="mf">15.83</span>         <span class="mf">15.50</span>
+<span class="p">[</span><span class="mi">45</span><span class="o">-</span><span class="mi">60</span><span class="p">]</span>            <span class="mi">59</span>         <span class="mi">359</span>         <span class="mf">16.48</span>         <span class="mf">16.59</span>
+<span class="p">[</span><span class="mi">60</span><span class="o">-</span><span class="mi">75</span><span class="p">]</span>            <span class="mi">74</span>         <span class="mi">354</span>         <span class="mf">17.61</span>         <span class="mf">17.59</span>
+<span class="p">[</span><span class="mi">75</span><span class="o">-</span><span class="mi">90</span><span class="p">]</span>            <span class="mi">89</span>         <span class="mi">354</span>         <span class="mf">17.06</span>         <span class="mf">17.20</span>
+<span class="p">[</span><span class="mi">90</span><span class="o">-</span><span class="mi">105</span><span class="p">]</span>          <span class="mi">104</span>         <span class="mi">334</span>         <span class="mf">18.12</span>         <span class="mf">18.85</span>
+<span class="p">[</span><span class="mi">105</span><span class="o">-</span><span class="mi">120</span><span class="p">]</span>         <span class="mi">119</span>         <span class="mi">352</span>         <span class="mf">16.98</span>         <span class="mf">17.27</span>
+<span class="p">[</span><span class="mi">120</span><span class="o">-</span><span class="mi">135</span><span class="p">]</span>         <span class="mi">134</span>         <span class="mi">345</span>         <span class="mf">17.36</span>         <span class="mf">17.42</span>
+<span class="p">[</span><span class="mi">135</span><span class="o">-</span><span class="mi">150</span><span class="p">]</span>         <span class="mi">149</span>         <span class="mi">329</span>         <span class="mf">20.71</span>         <span class="mf">20.46</span>
+<span class="p">[</span><span class="mi">150</span><span class="o">-</span><span class="mi">165</span><span class="p">]</span>         <span class="mi">164</span>         <span class="mi">316</span>         <span class="mf">19.94</span>         <span class="mf">19.83</span>
+<span class="p">[</span><span class="mi">165</span><span class="o">-</span><span class="mi">180</span><span class="p">]</span>         <span class="mi">179</span>         <span class="mi">359</span>         <span class="mf">19.67</span>         <span class="mf">19.31</span>
+<span class="p">[</span><span class="mi">180</span><span class="o">-</span><span class="mi">195</span><span class="p">]</span>         <span class="mi">194</span>         <span class="mi">357</span>         <span class="mf">18.73</span>         <span class="mf">18.36</span>
+<span class="p">[</span><span class="mi">195</span><span class="o">-</span><span class="mi">210</span><span class="p">]</span>         <span class="mi">209</span>         <span class="mi">358</span>         <span class="mf">19.18</span>         <span class="mf">19.04</span>
+<span class="p">[</span><span class="mi">210</span><span class="o">-</span><span class="mi">225</span><span class="p">]</span>         <span class="mi">224</span>         <span class="mi">356</span>         <span class="mf">25.82</span>         <span class="mf">25.91</span>
+<span class="p">[</span><span class="mi">225</span><span class="o">-</span><span class="mi">240</span><span class="p">]</span>         <span class="mi">239</span>         <span class="mi">359</span>         <span class="mf">29.64</span>         <span class="mf">29.73</span>
+<span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>         <span class="mi">254</span>         <span class="mi">359</span>         <span class="mf">30.71</span>         <span class="mf">30.75</span>
+<span class="p">[</span><span class="mi">255</span><span class="o">-</span><span class="mi">270</span><span class="p">]</span>         <span class="mi">269</span>         <span class="mi">358</span>         <span class="mf">26.15</span>         <span class="mf">26.31</span>
+<span class="p">[</span><span class="mi">270</span><span class="o">-</span><span class="mi">285</span><span class="p">]</span>         <span class="mi">284</span>         <span class="mi">359</span>         <span class="mf">24.74</span>         <span class="mf">24.96</span>
+<span class="p">[</span><span class="mi">285</span><span class="o">-</span><span class="mi">300</span><span class="p">]</span>         <span class="mi">299</span>         <span class="mi">355</span>         <span class="mf">18.28</span>         <span class="mf">18.46</span>
+<span class="p">[</span><span class="mi">300</span><span class="o">-</span><span class="mi">315</span><span class="p">]</span>         <span class="mi">314</span>         <span class="mi">359</span>         <span class="mf">16.99</span>         <span class="mf">17.32</span>
+<span class="p">[</span><span class="mi">315</span><span class="o">-</span><span class="mi">330</span><span class="p">]</span>         <span class="mi">329</span>         <span class="mi">359</span>         <span class="mf">16.68</span>         <span class="mf">17.05</span>
+<span class="p">[</span><span class="mi">330</span><span class="o">-</span><span class="mi">345</span><span class="p">]</span>         <span class="mi">344</span>         <span class="mi">359</span>         <span class="mf">18.77</span>         <span class="mf">18.93</span>
+<span class="p">[</span><span class="mi">345</span><span class="o">-</span><span class="mi">360</span><span class="p">]</span>         <span class="mi">359</span>         <span class="mi">359</span>         <span class="mf">18.74</span>         <span class="mf">18.47</span>
+</pre></div>
+
+
+<p>Ahhhh the magic of Pandas. </p>
+    
+            <p class=tags>This entry was tagged as
+            <a href="./tag/python.html">python</a>
+            <a href="./tag/wind-data.html">wind data</a>
+            <a href="./tag/pandas.html">pandas</a>
+            <a href="./tag/.html"></a>
+          </p>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'wrobstory'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>        </div>
+        
+                    <div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+        <a href=""><li><i class="icon-linkedin-sign icon-large" ></i></li></a>
+        <a href="" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+        <a href="./feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>            </div>
+          </body>
+</html>

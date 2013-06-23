@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Vega Axis Labeling | wrobstory.github.com </title>
+
+    <link rel="stylesheet" href="./theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="./theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="./theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+                    
+      <div class=navigation>
+        <ul>
+                      <li><a href="./index.html">Blog</a> </li>
+                      <li><a href="./archives.html">Archive</a> </li>
+                      <li><a href="./tags.html">Tags</a> </li>
+                  </ul>
+      </div>
+      <div class=separator></div>                
+        <div class=body>
+            <h1 class="title"> Vega Axis Labeling</h1>
+    <p class=date> Tue 23 April 2013 </p>
+    <p>One of the things that took me a bit of time in learning <a href="https://github.com/trifacta/vega">Vega</a> was creating simple axis titles. Here is my current methodology for doing so: create custom data for each label, then reference the data with mark instances: </p>
+<div class="highlight"><pre>    <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;Time&#39;</span><span class="p">}]},</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span> <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;AAPL Price&#39;</span><span class="p">}]},</span>
+       <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s">&#39;values&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;AAPL Stock Price 1/1/2010-1/1/2013&#39;</span><span class="p">}]}</span>
+      <span class="p">]</span>
+
+    <span class="s">&quot;marks&quot;</span><span class="p">:</span> <span class="p">[</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;x_label&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">35</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">400.0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">}}},</span>
+          <span class="p">},</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;y_label&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;angle&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">90</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">45</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">150.0</span><span class="p">}}},</span>
+         <span class="p">},</span>
+       <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span>
+        <span class="s">&#39;from&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">},</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;enter&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;align&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">},</span>
+          <span class="s">&#39;baseline&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;middle&#39;</span><span class="p">},</span>
+          <span class="s">&#39;dy&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">20</span><span class="p">},</span>
+          <span class="s">&#39;fill&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;#000&#39;</span><span class="p">},</span>
+          <span class="s">&#39;font&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="s">&#39;Helvetica Neue&#39;</span><span class="p">},</span>
+          <span class="s">&#39;fontSize&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">},</span>
+          <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.label&#39;</span><span class="p">},</span>
+          <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mf">400.0</span><span class="p">},</span>
+          <span class="s">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}},</span>
+          <span class="p">}</span>
+        <span class="p">]</span>
+</pre></div>
+
+
+<p>The x and y values on the marks are generally just half of the plot width and height, respectively. You'll need to adjust the padding a bit, but the presets above should provide relatively nice axis titles and labels: </p>
+<p><img alt="Stock plot" src="http://farm9.staticflickr.com/8393/8669181178_e22e576144_z.jpg" /></p>
+<p>Aside: the rest of this plot, including the data pull,  was generated in about 25 lines of Python with <a href="https://github.com/wrobstory/vincent/blob/master/examples/pandas_example.py">Vincent</a>. I'm trying to make Vincent "Vega-for-Humans" as much as possible, so the syntax for generating all of the Vega specs above is: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;AAPL Price&#39;</span><span class="p">,</span> 
+                  <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="n">AAPL</span> <span class="n">Stock</span> <span class="n">Price</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="mi">2010</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="mi">2013</span><span class="s">&#39;)</span>
+</pre></div>
+    
+            <p class=tags>This entry was tagged as
+            <a href="./tag/vincent.html">vincent</a>
+            <a href="./tag/vega.html">vega</a>
+            <a href="./tag/javascript.html">javascript</a>
+            <a href="./tag/python.html">python</a>
+            <a href="./tag/pandas.html">pandas</a>
+          </p>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'wrobstory'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>        </div>
+        
+                    <div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+        <a href=""><li><i class="icon-linkedin-sign icon-large" ></i></li></a>
+        <a href="" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+        <a href="./feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>            </div>
+          </body>
+</html>
