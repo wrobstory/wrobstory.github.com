@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Real world Pandas: Cut and Where | wrobstory.github.com </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+                    
+      <div class=navigation>
+        <ul>
+                      <li><a href="/index.html">Blog</a> </li>
+                      <li><a href="/archives.html">Archive</a> </li>
+                      <li><a href="/tags.html">Tags</a> </li>
+                  </ul>
+      </div>
+      <div class=separator></div>                
+        <div class=body>
+            <h1 class="title"> Real world Pandas: Cut and Where</h1>
+    <p class=date> Mon 08 April 2013 </p>
+    <p>I forgot to mention in the last post why this series is called Real World Pandas. The Pandas documentation is really, really great, and the examples are exactly what I would want starting out- simple foo/bar/baz type of tables that make it simple to see what transformations are happening. The goal of these blog posts is to show a few examples of "real-world" applications, similar to Wes McKinney's examples in his <a href="http://shop.oreilly.com/product/0636920023784.do">book</a>. A book I highly recommend, btw- not only is the Pandas stuff great, as you would expect, but it has one of the best Python crash courses I've read, as well a great intro to IPython, Numpy, and Matplotlib. I still find myself referencing it. </p>
+<p>Lets again pull in some data from my <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. </p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">climatic</span> <span class="kn">as</span> <span class="nn">cl</span>
+
+<span class="n">walsenburg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">MetMast</span><span class="p">()</span>
+<span class="n">walsenburg</span><span class="o">.</span><span class="n">wind_import</span><span class="p">(</span><span class="s">r&#39;CO_Walsenburg_South_Data.txt&#39;</span><span class="p">,</span> 
+                       <span class="n">header_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+                       <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">smart_headers</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Now let's generate a weibull distribution: </p>
+<div class="highlight"><pre><span class="n">walsenburg</span><span class="o">.</span><span class="n">weibull</span><span class="p">([</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">])</span>
+</pre></div>
+
+
+<p>This will generate both binned data and a continuous distribution of the WS Mean 1 signal: <img alt="weibull" src="http://farm9.staticflickr.com/8099/8633712952_49d674672c_o.png" /></p>
+<p>Going behind the scenes again: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c">#Grab wind speed column</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">ws_data</span> <span class="o">=</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)]</span>
+
+<span class="c">#Build your range, use pd.cut to bin the data</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">ws_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">binned</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">ws_data</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">)</span>
+
+<span class="c">#Do a simple value counts to get your histogram, then reindex to </span>
+<span class="c">#align the bins from 0-31: </span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist_10min</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">binned</span><span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">binned</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>       <span class="mi">3650</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>       <span class="mi">5813</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>       <span class="mi">9139</span>
+<span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>      <span class="mi">10917</span>
+<span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>      <span class="mi">10648</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>      <span class="mi">10072</span>
+<span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>       <span class="mi">9302</span>
+<span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>       <span class="mi">8020</span>
+<span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>       <span class="mi">7105</span>
+<span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>      <span class="mi">6351</span>
+<span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span>     <span class="mi">5703</span>
+<span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>     <span class="mi">4783</span>
+<span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>     <span class="mi">3954</span>
+<span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span>     <span class="mi">3058</span>
+<span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span>     <span class="mi">2318</span>
+<span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>     <span class="mi">1614</span>
+<span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span>     <span class="mi">1074</span>
+<span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span>      <span class="mi">780</span>
+<span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span>      <span class="mi">544</span>
+<span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>      <span class="mi">403</span>
+<span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span>      <span class="mi">274</span>
+<span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">]</span>      <span class="mi">186</span>
+<span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">]</span>      <span class="mi">133</span>
+<span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">]</span>       <span class="mi">99</span>
+<span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]</span>       <span class="mi">75</span>
+<span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">]</span>       <span class="mi">59</span>
+<span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">]</span>       <span class="mi">27</span>
+<span class="p">(</span><span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">]</span>       <span class="mi">23</span>
+<span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">29</span><span class="p">]</span>        <span class="mi">9</span>
+<span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>        <span class="mi">5</span>
+<span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">31</span><span class="p">]</span>        <span class="mi">2</span>
+
+<span class="c">#Counts are good, but I want to add a couple more columns. Lets </span>
+<span class="c">#turn the series into a dataframe: </span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;Binned: 10Min&#39;</span><span class="p">:</span> <span class="n">dist_10min</span><span class="p">})</span>
+
+<span class="c">#Now lets get the number of hours in each bin, and some </span>
+<span class="c">#normalized values: </span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist</span><span class="p">[</span><span class="s">&#39;Binned: Hourly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="s">&#39;Binned: 10Min&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">6</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c">#No data, zero hours...</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist</span><span class="p">[</span><span class="s">&#39;Normed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="s">&#39;Binned: 10Min&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">dist</span><span class="p">[</span><span class="s">&#39;Binned: 10Min&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">dist</span>
+          <span class="n">Binned</span><span class="p">:</span> <span class="mi">10</span><span class="n">Min</span>  <span class="n">Binned</span><span class="p">:</span> <span class="n">Hourly</span>     <span class="n">Normed</span>
+<span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>             <span class="mi">3650</span>      <span class="mf">608.333333</span>   <span class="mf">3.438854</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>             <span class="mi">5813</span>      <span class="mf">968.833333</span>   <span class="mf">5.476729</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>             <span class="mi">9139</span>     <span class="mf">1523.166667</span>   <span class="mf">8.610326</span>
+<span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>            <span class="mi">10917</span>     <span class="mf">1819.500000</span>  <span class="mf">10.285472</span>
+<span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>            <span class="mi">10648</span>     <span class="mf">1774.666667</span>  <span class="mf">10.032033</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>            <span class="mi">10072</span>     <span class="mf">1678.666667</span>   <span class="mf">9.489354</span>
+<span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>             <span class="mi">9302</span>     <span class="mf">1550.333333</span>   <span class="mf">8.763897</span>
+<span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>             <span class="mi">8020</span>     <span class="mf">1336.666667</span>   <span class="mf">7.556058</span>
+<span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>             <span class="mi">7105</span>     <span class="mf">1184.166667</span>   <span class="mf">6.693989</span>
+<span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>            <span class="mi">6351</span>     <span class="mf">1058.500000</span>   <span class="mf">5.983607</span>
+<span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span>           <span class="mi">5703</span>      <span class="mf">950.500000</span>   <span class="mf">5.373092</span>
+<span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>           <span class="mi">4783</span>      <span class="mf">797.166667</span>   <span class="mf">4.506312</span>
+<span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>           <span class="mi">3954</span>      <span class="mf">659.000000</span>   <span class="mf">3.725269</span>
+<span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span>           <span class="mi">3058</span>      <span class="mf">509.666667</span>   <span class="mf">2.881100</span>
+<span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span>           <span class="mi">2318</span>      <span class="mf">386.333333</span>   <span class="mf">2.183908</span>
+<span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>           <span class="mi">1614</span>      <span class="mf">269.000000</span>   <span class="mf">1.520633</span>
+<span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span>           <span class="mi">1074</span>      <span class="mf">179.000000</span>   <span class="mf">1.011871</span>
+<span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span>            <span class="mi">780</span>      <span class="mf">130.000000</span>   <span class="mf">0.734878</span>
+<span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span>            <span class="mi">544</span>       <span class="mf">90.666667</span>   <span class="mf">0.512531</span>
+<span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>            <span class="mi">403</span>       <span class="mf">67.166667</span>   <span class="mf">0.379687</span>
+<span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span>            <span class="mi">274</span>       <span class="mf">45.666667</span>   <span class="mf">0.258150</span>
+<span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">]</span>            <span class="mi">186</span>       <span class="mf">31.000000</span>   <span class="mf">0.175240</span>
+<span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">]</span>            <span class="mi">133</span>       <span class="mf">22.166667</span>   <span class="mf">0.125306</span>
+<span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">]</span>             <span class="mi">99</span>       <span class="mf">16.500000</span>   <span class="mf">0.093273</span>
+<span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]</span>             <span class="mi">75</span>       <span class="mf">12.500000</span>   <span class="mf">0.070661</span>
+<span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">]</span>             <span class="mi">59</span>        <span class="mf">9.833333</span>   <span class="mf">0.055587</span>
+<span class="p">(</span><span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">]</span>             <span class="mi">27</span>        <span class="mf">4.500000</span>   <span class="mf">0.025438</span>
+<span class="p">(</span><span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">]</span>             <span class="mi">23</span>        <span class="mf">3.833333</span>   <span class="mf">0.021669</span>
+<span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">29</span><span class="p">]</span>              <span class="mi">9</span>        <span class="mf">1.500000</span>   <span class="mf">0.008479</span>
+<span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>              <span class="mi">5</span>        <span class="mf">0.833333</span>   <span class="mf">0.004711</span>
+<span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">31</span><span class="p">]</span>              <span class="mi">2</span>        <span class="mf">0.333333</span>   <span class="mf">0.001884</span>
+</pre></div>
+
+
+<p>In just a few lines of Pandas, we went from a pile of data to nicely binned data. </p>
+<p>One more quick example for this week: using the .where method on a dataframe to filter for the data you want. 
+When analyzing wind data, its very common to have a "Flag" column that indicates whether or not a datapoint
+should be filtered. Let's concat a new small example dataframe and make up some flags: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">][:</span><span class="mi">20</span><span class="p">],</span> 
+                     <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 2&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)][:</span><span class="mi">20</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span>
+
+                     <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="n">Flag</span>
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                                              
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.05</span>              <span class="mf">12.26</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.48</span>              <span class="mf">11.60</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.19</span>              <span class="mf">14.39</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.21</span>              <span class="mf">13.43</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.92</span>              <span class="mf">12.12</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.90</span>              <span class="mf">12.05</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.78</span>              <span class="mf">12.92</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.27</span>              <span class="mf">13.40</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.05</span>              <span class="mf">14.24</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.32</span>              <span class="mf">13.48</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.32</span>              <span class="mf">15.43</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">16.60</span>              <span class="mf">16.70</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.91</span>              <span class="mf">16.01</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.62</span>              <span class="mf">15.73</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.16</span>              <span class="mf">15.24</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.96</span>              <span class="mf">16.06</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.84</span>              <span class="mf">15.02</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.14</span>              <span class="mf">15.30</span>     <span class="mi">1</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.33</span>              <span class="mf">14.49</span>     <span class="mi">0</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.20</span>              <span class="mf">13.37</span>     <span class="mi">1</span>
+</pre></div>
+
+
+<p>Now I want a create a new wind speed column with only rows where Flag == 0:  </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Flag WS 1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span><span class="n">data</span>
+
+                     <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="n">Flag</span>  <span class="n">Flag</span> <span class="n">WS</span> <span class="mi">1</span>
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                                                         
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.05</span>              <span class="mf">12.26</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.48</span>              <span class="mf">11.60</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.19</span>              <span class="mf">14.39</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.21</span>              <span class="mf">13.43</span>     <span class="mi">0</span>      <span class="mf">13.21</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.92</span>              <span class="mf">12.12</span>     <span class="mi">0</span>      <span class="mf">11.92</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.90</span>              <span class="mf">12.05</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.78</span>              <span class="mf">12.92</span>     <span class="mi">0</span>      <span class="mf">12.78</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.27</span>              <span class="mf">13.40</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.05</span>              <span class="mf">14.24</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.32</span>              <span class="mf">13.48</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.32</span>              <span class="mf">15.43</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">16.60</span>              <span class="mf">16.70</span>     <span class="mi">0</span>      <span class="mf">16.60</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.91</span>              <span class="mf">16.01</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.62</span>              <span class="mf">15.73</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.16</span>              <span class="mf">15.24</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.96</span>              <span class="mf">16.06</span>     <span class="mi">0</span>      <span class="mf">15.96</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.84</span>              <span class="mf">15.02</span>     <span class="mi">0</span>      <span class="mf">14.84</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.14</span>              <span class="mf">15.30</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.33</span>              <span class="mf">14.49</span>     <span class="mi">0</span>      <span class="mf">14.33</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.20</span>              <span class="mf">13.37</span>     <span class="mi">1</span>        <span class="n">NaN</span>
+</pre></div>
+
+
+<p>I also could have replaced any flagged value with another value: </p>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Flag WS 1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">999</span><span class="p">)</span>
+
+                     <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="p">(</span><span class="n">WS</span> <span class="n">Mean</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>  <span class="n">Flag</span>  <span class="n">Flag</span> <span class="n">WS</span> <span class="mi">1</span>
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                                                         
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.05</span>              <span class="mf">12.26</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.48</span>              <span class="mf">11.60</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.19</span>              <span class="mf">14.39</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.21</span>              <span class="mf">13.43</span>     <span class="mi">0</span>      <span class="mf">13.21</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.92</span>              <span class="mf">12.12</span>     <span class="mi">0</span>      <span class="mf">11.92</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">11.90</span>              <span class="mf">12.05</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">12.78</span>              <span class="mf">12.92</span>     <span class="mi">0</span>      <span class="mf">12.78</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.27</span>              <span class="mf">13.40</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.05</span>              <span class="mf">14.24</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.32</span>              <span class="mf">13.48</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.32</span>              <span class="mf">15.43</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">16.60</span>              <span class="mf">16.70</span>     <span class="mi">0</span>      <span class="mf">16.60</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.91</span>              <span class="mf">16.01</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.62</span>              <span class="mf">15.73</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.16</span>              <span class="mf">15.24</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.96</span>              <span class="mf">16.06</span>     <span class="mi">0</span>      <span class="mf">15.96</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.84</span>              <span class="mf">15.02</span>     <span class="mi">0</span>      <span class="mf">14.84</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">16</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">15.14</span>              <span class="mf">15.30</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">14.33</span>              <span class="mf">14.49</span>     <span class="mi">0</span>      <span class="mf">14.33</span>
+<span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">17</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>              <span class="mf">13.20</span>              <span class="mf">13.37</span>     <span class="mi">1</span>    <span class="o">-</span><span class="mf">999.00</span>
+</pre></div>
+
+
+<p>Next week I hope to cover some ways to manipulate a MultiIndex and Panels to group data
+in logical and helpful ways. Thanks for reading!</p>
+    
+            <p class=tags>This entry was tagged as
+            <a href="/tag/python.html">python</a>
+            <a href="/tag/wind-data.html">wind data</a>
+            <a href="/tag/pandas.html">pandas</a>
+            <a href="/tag/.html"></a>
+          </p>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = ''; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>        </div>
+        
+                    <div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+        <a href=""><li><i class="icon-linkedin-sign icon-large" ></i></li></a>
+        <a href="" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+        <a href="/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>            </div>
+          </body>
+</html>
