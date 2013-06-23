@@ -1,57 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-        <title>Plotting Time Series with Pandas DatetimeIndex and Vincent</title>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="../../theme/css/main.css" type="text/css" />
-                <link href="http://wrobstory.github.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="wrobstory.github.com Atom Feed" />
-                
-        <!--[if IE]>
-                <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Plotting Time Series with Pandas DatetimeIndex and Vincent | wrobstory.github.com </title>
 
-        <!--[if lte IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="../../css/ie.css"/>
-                <script src="../../js/IE8.js" type="text/javascript"></script><![endif]-->
-
-        <!--[if lt IE 7]>
-                <link rel="stylesheet" type="text/css" media="all" href="../../css/ie6.css"/><![endif]-->
-
-</head>
-
-<body id="index" class="home">
-<a href="https://github.com/wrobstory">
-<img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" />
-</a>
-        <header id="banner" class="body">
-                <h1><a href="../../">wrobstory.github.com </a></h1>
-                <nav><ul>
-                                    <li><a href="http://wrobstory.github.com/archives.html">Archives</a></li>
-                                                                                                    <li class="active"><a href="../../category/blog.html">Blog</a></li>
-                                </ul></nav>
-        </header><!-- /#banner -->
-        <section id="content" class="body">
-  <article>
-    <header>
-      <h1 class="entry-title">
-        <a href="../../2013/04/pandas-vincent-timeseries.html" rel="bookmark"
-           title="Permalink to Plotting Time Series with Pandas DatetimeIndex and Vincent">Plotting Time Series with Pandas DatetimeIndex and Vincent</a></h1>
-      <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="oceankidbilly">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
-    </header>
-
-    <div class="entry-content">
-      <footer class="post-info">
-        <abbr class="published" title="2013-04-21T00:00:00">
-                Sun 21 April 2013
-        </abbr>
-
-                <address class="vcard author">
-                By <a class="url fn" href="../../author/rob-story.html">Rob Story</a>
-        </address>
-        <p>In <a href="../../category/blog.html">Blog</a>. </p>
-<p>tags: <a href="../../tag/python.html">python</a><a href="../../tag/pandas.html">pandas</a><a href="../../tag/vincent.html">vincent</a><a href="../../tag/data.html">data</a></p>
-</footer><!-- /.post-info -->      <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making plot building simple. </p>
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+                    
+      <div class=navigation>
+        <ul>
+                      <li><a href="/index.html">Blog</a> </li>
+                      <li><a href="/archives.html">Archive</a> </li>
+                      <li><a href="/tags.html">Tags</a> </li>
+                  </ul>
+      </div>
+      <div class=separator></div>                
+        <div class=body>
+            <h1 class="title"> Plotting Time Series with Pandas DatetimeIndex and Vincent</h1>
+    <p class=date> Sun 21 April 2013 </p>
+    <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making plot building simple. </p>
 <p>Here are a few quick, easy examples: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">vincent</span>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">vincent</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
@@ -78,7 +53,7 @@
 <p><img alt="Timeseries" src="http://farm9.staticflickr.com/8533/8668792331_c47f471525_z.jpg" /></p>
 <p>A fully embeddable javascript graph in less than 10 lines of Python- not bad. </p>
 <p>Pandas lets us perform a number of resampling operations on our data: </p>
-<div class="codehilite"><pre><span class="c">#Resample to hourly, which can take a lambda function in addition to the </span>
+<div class="highlight"><pre><span class="c">#Resample to hourly, which can take a lambda function in addition to the </span>
 <span class="c">#standard mean, max, min, etc. </span>
 <span class="n">half_day</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 12:00:00&#39;</span><span class="p">]</span>
 <span class="n">hourly</span> <span class="o">=</span> <span class="n">half_day</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
@@ -95,7 +70,7 @@
 
 <p><img alt="Area" src="http://farm9.staticflickr.com/8535/8668790817_63f3ef0e87_z.jpg" /></p>
 <p>We can keep sampling to lower resolutions: </p>
-<div class="codehilite"><pre><span class="n">half_hour</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 00:30:00&#39;</span><span class="p">]</span>
+<div class="highlight"><pre><span class="n">half_hour</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 00:30:00&#39;</span><span class="p">]</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">half_hour</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;minute&#39;</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time (Minutes)&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Data vs. Time&#39;</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -104,7 +79,7 @@
 
 <p><img alt="Downsample" src="http://farm9.staticflickr.com/8530/8668790975_49d1f499c6_z.jpg" /></p>
 <p>Finally, we can plot some real data using a little snippet from the <a href="http://shop.oreilly.com/product/0636920023784.do">Python for Data Analysis</a> book: </p>
-<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pandas.io.data</span> <span class="kn">as</span> <span class="nn">web</span>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas.io.data</span> <span class="kn">as</span> <span class="nn">web</span>
 
 <span class="c">#All of the following import code comes from Python for Data Analysis</span>
 <span class="n">all_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -131,39 +106,50 @@
 
 
 <p><img alt="AAPL" src="http://farm9.staticflickr.com/8537/8669892378_7ed7103e16_z.jpg" /></p>
-    </div><!-- /.entry-content -->
     
-  </article>
-</section>
-        <section id="extras" class="body">
-                                <div class="social">
-                        <h2>social</h2>
-                        <ul>
-                            <li><a href="http://wrobstory.github.com/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
-                            
-                                                    <li><a href="http://twitter.com/oceankidbilly">twitter</a></li>
-                                                    <li><a href="http://github.com/wrobstory">github</a></li>
-                                                </ul>
-                </div><!-- /.social -->
-                </section><!-- /#extras -->
+            <p class=tags>This entry was tagged as
+            <a href="/tag/python.html">python</a>
+            <a href="/tag/pandas.html">pandas</a>
+            <a href="/tag/vincent.html">vincent</a>
+            <a href="/tag/data.html">data</a>
+          </p>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = ''; // required: replace example with your forum shortname
 
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
-
-                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-        </footer><!-- /#contentinfo -->
-
-    <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-39972069-1']);
-    _gaq.push(['_trackPageview']);
+    /* * * DON'T EDIT BELOW THIS LINE * * */
     (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
-    </script>
-</body>
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>        </div>
+        
+                    <div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.  
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p> 
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + u + '@' + s + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+        <a href=""><li><i class="icon-linkedin-sign icon-large" ></i></li></a>
+        <a href="" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+        <a href="/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a>
+      </ul>
+    </div>
+  </p>
+</div>            </div>
+          </body>
 </html>
