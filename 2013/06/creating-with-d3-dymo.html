@@ -23,7 +23,7 @@
       <div class=separator></div>                
         <div class=body>
             <h1 class="title"> Creating and Publishing Maps with D3, Dymo, and PhantomJS</h1>
-    <p class=date> Sat 22 June 2013</p>
+    <p class=date> Mon 24 June 2013</p>
     <p>Problem statement: We want to make a map with D3, automate the label placement, and publish to PDF or PNG. This is a very basic example showing how to put the pieces together- with a little polish and CSS, this workflow can create some great looking maps.</p>
 <p>We'll get neighborhood data from Portland's <a href="http://www.portlandoregon.gov/bts/article/268487">Data Catalog</a>, which comes in the Oregon State Plane coordinate system. I generally convert everything to WGS 84, particularly if there's any chance I'm going to add more layers from different coordinate systems down the road:</p>
 <div class="highlight"><pre><span class="nv">$ </span>ogr2ogr -f GeoJSON <span class="se">\</span>
@@ -73,7 +73,7 @@
 </pre></div>
 
 
-<p>Then we'll <a href="https://github.com/mbostock/queue">queue</a> it up, add the labels, and see what we have:</p>
+<p>Then we'll <a href="https://github.com/mbostock/queue">queue</a> it up, add the labels, and see what purely centroid-centered labels look like:</p>
 <div class="highlight"><pre><span class="nx">queue</span><span class="p">()</span>
 <span class="p">.</span><span class="nx">defer</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">json</span><span class="p">,</span> <span class="s2">&quot;neighborhoods.topo.json&quot;</span><span class="p">)</span>
 <span class="p">.</span><span class="nx">await</span><span class="p">(</span><span class="nx">makeMap</span><span class="p">);</span>
@@ -103,7 +103,7 @@
 
 
 <p><img alt="mapstart" src="http://farm6.staticflickr.com/5546/9130557745_e8c5550738_o.jpg" /></p>
-<p>Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice <a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html">blog post</a> about Dymo, which we'll use as an example of how to prep our data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, which we'll feed to Dymo as our label points along with some other necessary inputs:</p>
+<p>Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice <a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html">blog post</a> about Dymo, which we'll use as an example of how to prep the data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, then feed them to Dymo as our lat/lng along with some other necessary inputs:</p>
 <div class="highlight"><pre><span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
@@ -153,12 +153,12 @@
 <blockquote>
 <p>Important: the inside of a polygon is all points that the polygon winds around in a clockwise order. If your GeoJSON input has polygons in the wrong winding order, you must reverse them, say via ST_ForceRHR; you can also convert your GeoJSON to TopoJSON, and this will happen automatically.</p>
 </blockquote>
-<p>There is a lesson here: when the d3 docs say something is important, pay attention. The Dymo output is in <em>counterclockwise</em> order, and if we don't TopoJSON-ize it, there's going to be trouble later on. Let's do that, and keep the "name" property:</p>
+<p>There is a lesson here: when the d3 docs say something is important, pay attention. The Dymo output is in <em>counterclockwise</em> order, and if we don't TopoJSON-ize it, there's going to be trouble later on. Let's keep the "name" property:</p>
 <div class="highlight"><pre><span class="nv">$ </span>topojson -o labels.topo.json -p name -- labels.json
 </pre></div>
 
 
-<p>Here's the D3 to plot labels and points:</p>
+<p>Add the D3 to plot labels and points:</p>
 <div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.symbol&quot;</span><span class="p">)</span>
    <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">points</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
 <span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
@@ -176,7 +176,7 @@
 
 <p>...and the result:</p>
 <p><img alt="prelim2" src="http://farm8.staticflickr.com/7303/9130557659_4c77d6f634_o.jpg" /></p>
-<p>Cool! Dymo has done its best to resolve as many of the overlapping labels as it could. Unfortunately, the information density on this map is just too high- I think that even placing labels by hand we would be hard pressed to fit some of them in the map, and they would need to be moved to a legend, popover, or leading line. For the purposes of this demo, I'm going to run dymo again without passing the "--include-overlaps" parameter, so that overlapping regions will be excluded.</p>
+<p>Cool! Dymo has done its best to resolve as many of the overlapping labels as it could. Unfortunately, the information density on this map is just too high- I think that even placing labels by hand we would be hard pressed to fit some of them in the map, and they would need to be moved to a legend, popover, or leading line. For the purposes of this demo, I'm going to run Dymo again without passing the "--include-overlaps" parameter, so that overlapping regions will be excluded.</p>
 <p>With the resulting output, we're going to bind the text to the centroid of each label box that Dymo produces (and we'll get rid of the boxes themselves):</p>
 <div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
    <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">dymo_labels</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
@@ -193,7 +193,7 @@
 <p><img alt="both" src="http://farm6.staticflickr.com/5549/9132768662_4d7dbc08bc_o.jpg" /></p>
 <p>As you can see, Dymo did some nice spacing work for us in a lot of places, and eliminated all of our overlaps in the crowded interior as well.</p>
 <p>Finally, to <a href="http://phantomjs.org/">PhantomJS</a>, a headless WebKit engine that can do all sorts of great things, but which I've found very useful for simply converting SVGs to PNG and PDF; this is handy for creating static assets to use in reports or presentations.</p>
-<p>To start, I'm using the <a href="https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js">rasterize.js</a> script included in the examples. Second, I've found that PNGs render best when you append a background to your SVG (if you don't want transparency as the background, that is). A quick D3 append that I CSS-fill to white:</p>
+<p>To start, I'm using the <a href="https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js">rasterize.js</a> script included in the examples. Next, I've found that smaller fonts render best when you append a background to the SVG (if you don't want transparency as the background, that is). A quick D3 append that is CSS filled to white:</p>
 <div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;rect&quot;</span><span class="p">)</span>
    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;background&quot;</span><span class="p">)</span>
    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="nx">width</span><span class="p">)</span>
@@ -201,19 +201,19 @@
 </pre></div>
 
 
-<p>and then a quick shell command on your map running in localhost (PhantomJS also renders to JPEG and GIF, see the <a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture">docs</a>):</p>
+<p>and then a one-line shell command on the map running in localhost (PhantomJS also renders to JPEG and GIF, see the <a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture">docs</a>):</p>
 <div class="highlight"><pre><span class="nv">$ </span>phantomjs rasterize.js http://localhost:8000/index.html mymap.png
 </pre></div>
 
 
-<p>...and out comes a rather nice looking PNG- all of the images in this article were created using PhantomJS.</p>
-<p>Finally, it will also produce PDFs, which will even take some paper format commands:</p>
+<p>...and out comes a rather nice looking PNG; all of the images in this article were created using PhantomJS.</p>
+<p>Finally, it will also produce PDFs, which will even take some paper formatting commands:</p>
 <div class="highlight"><pre><span class="nv">$ </span>phantomjs rasterize.js http://localhost:8000/index.html mymap.pdf <span class="s2">&quot;Letter&quot;</span>
 </pre></div>
 
 
-<p>That's it! Some nice tools to automate label placement and export your maps to various output types. This workflow really can create some beautiful labeling, particularly on maps where you have small groupings of labels.</p>
-<p>I've included everything from this article, including all of the data, D3 code, and pngs/pdfs, in its own <a href="https://github.com/wrobstory/portlandmapdemo">Github repo</a>, so feel free to take a closer look.</p>
+<p>That's it! Some nice tools to automate label placement and export your maps to various output types. This workflow really can create some beautiful labeling, particularly on maps where you have numerous small groupings of labels that need to be separated.</p>
+<p>I've included everything from this article, including all of the data, D3 code, and PNGs/PDFs, in its own <a href="https://github.com/wrobstory/portlandmapdemo">Github repo</a>, so feel free to take a closer look.</p>
 
     <div class=twitter>
 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>

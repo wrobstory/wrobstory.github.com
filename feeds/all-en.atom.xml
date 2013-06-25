@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>wrobstory.github.io</title><link href="/" rel="alternate"></link><link href="/feeds/all-en.atom.xml" rel="self"></link><id>/</id><updated>2013-06-22T00:00:00-07:00</updated><entry><title>Creating and Publishing Maps with D3, Dymo, and PhantomJS</title><link href="/2013/06/creating-with-d3-dymo.html" rel="alternate"></link><updated>2013-06-22T00:00:00-07:00</updated><author><name>Rob Story</name></author><id>tag:,2013-06-22:2013/06/creating-with-d3-dymo.html</id><summary type="html">&lt;p&gt;Problem statement: We want to make a map with D3, automate the label placement, and publish to PDF or PNG. This is a very basic example showing how to put the pieces together- with a little polish and CSS, this workflow can create some great looking maps.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>wrobstory.github.io</title><link href="/" rel="alternate"></link><link href="/feeds/all-en.atom.xml" rel="self"></link><id>/</id><updated>2013-06-24T00:00:00-07:00</updated><entry><title>Creating and Publishing Maps with D3, Dymo, and PhantomJS</title><link href="/2013/06/creating-with-d3-dymo.html" rel="alternate"></link><updated>2013-06-24T00:00:00-07:00</updated><author><name>Rob Story</name></author><id>tag:,2013-06-24:2013/06/creating-with-d3-dymo.html</id><summary type="html">&lt;p&gt;Problem statement: We want to make a map with D3, automate the label placement, and publish to PDF or PNG. This is a very basic example showing how to put the pieces together- with a little polish and CSS, this workflow can create some great looking maps.&lt;/p&gt;
 &lt;p&gt;We'll get neighborhood data from Portland's &lt;a href="http://www.portlandoregon.gov/bts/article/268487"&gt;Data Catalog&lt;/a&gt;, which comes in the Oregon State Plane coordinate system. I generally convert everything to WGS 84, particularly if there's any chance I'm going to add more layers from different coordinate systems down the road:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;ogr2ogr -f GeoJSON &lt;span class="se"&gt;\&lt;/span&gt;
           -t_srs EPSG:4326 &lt;span class="se"&gt;\&lt;/span&gt;
@@ -48,7 +48,7 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Then we'll &lt;a href="https://github.com/mbostock/queue"&gt;queue&lt;/a&gt; it up, add the labels, and see what we have:&lt;/p&gt;
+&lt;p&gt;Then we'll &lt;a href="https://github.com/mbostock/queue"&gt;queue&lt;/a&gt; it up, add the labels, and see what purely centroid-centered labels look like:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;queue&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;defer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;d3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;neighborhoods.topo.json&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;await&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;makeMap&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
@@ -78,7 +78,7 @@
 
 
 &lt;p&gt;&lt;img alt="mapstart" src="http://farm6.staticflickr.com/5546/9130557745_e8c5550738_o.jpg" /&gt;&lt;/p&gt;
-&lt;p&gt;Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice &lt;a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html"&gt;blog post&lt;/a&gt; about Dymo, which we'll use as an example of how to prep our data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, which we'll feed to Dymo as our label points along with some other necessary inputs:&lt;/p&gt;
+&lt;p&gt;Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice &lt;a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html"&gt;blog post&lt;/a&gt; about Dymo, which we'll use as an example of how to prep the data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, then feed them to Dymo as our lat/lng along with some other necessary inputs:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;osgeo&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;ogr&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
 
@@ -128,12 +128,12 @@
 &lt;blockquote&gt;
 &lt;p&gt;Important: the inside of a polygon is all points that the polygon winds around in a clockwise order. If your GeoJSON input has polygons in the wrong winding order, you must reverse them, say via ST_ForceRHR; you can also convert your GeoJSON to TopoJSON, and this will happen automatically.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;There is a lesson here: when the d3 docs say something is important, pay attention. The Dymo output is in &lt;em&gt;counterclockwise&lt;/em&gt; order, and if we don't TopoJSON-ize it, there's going to be trouble later on. Let's do that, and keep the "name" property:&lt;/p&gt;
+&lt;p&gt;There is a lesson here: when the d3 docs say something is important, pay attention. The Dymo output is in &lt;em&gt;counterclockwise&lt;/em&gt; order, and if we don't TopoJSON-ize it, there's going to be trouble later on. Let's keep the "name" property:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;topojson -o labels.topo.json -p name -- labels.json
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Here's the D3 to plot labels and points:&lt;/p&gt;
+&lt;p&gt;Add the D3 to plot labels and points:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;svg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;selectAll&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;.symbol&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;data&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;points&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;features&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;enter&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;path&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -151,7 +151,7 @@
 
 &lt;p&gt;...and the result:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="prelim2" src="http://farm8.staticflickr.com/7303/9130557659_4c77d6f634_o.jpg" /&gt;&lt;/p&gt;
-&lt;p&gt;Cool! Dymo has done its best to resolve as many of the overlapping labels as it could. Unfortunately, the information density on this map is just too high- I think that even placing labels by hand we would be hard pressed to fit some of them in the map, and they would need to be moved to a legend, popover, or leading line. For the purposes of this demo, I'm going to run dymo again without passing the "--include-overlaps" parameter, so that overlapping regions will be excluded.&lt;/p&gt;
+&lt;p&gt;Cool! Dymo has done its best to resolve as many of the overlapping labels as it could. Unfortunately, the information density on this map is just too high- I think that even placing labels by hand we would be hard pressed to fit some of them in the map, and they would need to be moved to a legend, popover, or leading line. For the purposes of this demo, I'm going to run Dymo again without passing the "--include-overlaps" parameter, so that overlapping regions will be excluded.&lt;/p&gt;
 &lt;p&gt;With the resulting output, we're going to bind the text to the centroid of each label box that Dymo produces (and we'll get rid of the boxes themselves):&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;svg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;selectAll&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;data&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;dymo_labels&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;features&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -168,7 +168,7 @@
 &lt;p&gt;&lt;img alt="both" src="http://farm6.staticflickr.com/5549/9132768662_4d7dbc08bc_o.jpg" /&gt;&lt;/p&gt;
 &lt;p&gt;As you can see, Dymo did some nice spacing work for us in a lot of places, and eliminated all of our overlaps in the crowded interior as well.&lt;/p&gt;
 &lt;p&gt;Finally, to &lt;a href="http://phantomjs.org/"&gt;PhantomJS&lt;/a&gt;, a headless WebKit engine that can do all sorts of great things, but which I've found very useful for simply converting SVGs to PNG and PDF; this is handy for creating static assets to use in reports or presentations.&lt;/p&gt;
-&lt;p&gt;To start, I'm using the &lt;a href="https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js"&gt;rasterize.js&lt;/a&gt; script included in the examples. Second, I've found that PNGs render best when you append a background to your SVG (if you don't want transparency as the background, that is). A quick D3 append that I CSS-fill to white:&lt;/p&gt;
+&lt;p&gt;To start, I'm using the &lt;a href="https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js"&gt;rasterize.js&lt;/a&gt; script included in the examples. Next, I've found that smaller fonts render best when you append a background to the SVG (if you don't want transparency as the background, that is). A quick D3 append that is CSS filled to white:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;svg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;rect&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;attr&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;class&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;background&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;attr&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;width&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;width&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -176,19 +176,19 @@
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;and then a quick shell command on your map running in localhost (PhantomJS also renders to JPEG and GIF, see the &lt;a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture"&gt;docs&lt;/a&gt;):&lt;/p&gt;
+&lt;p&gt;and then a one-line shell command on the map running in localhost (PhantomJS also renders to JPEG and GIF, see the &lt;a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture"&gt;docs&lt;/a&gt;):&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;phantomjs rasterize.js http://localhost:8000/index.html mymap.png
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;...and out comes a rather nice looking PNG- all of the images in this article were created using PhantomJS.&lt;/p&gt;
-&lt;p&gt;Finally, it will also produce PDFs, which will even take some paper format commands:&lt;/p&gt;
+&lt;p&gt;...and out comes a rather nice looking PNG; all of the images in this article were created using PhantomJS.&lt;/p&gt;
+&lt;p&gt;Finally, it will also produce PDFs, which will even take some paper formatting commands:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;phantomjs rasterize.js http://localhost:8000/index.html mymap.pdf &lt;span class="s2"&gt;&amp;quot;Letter&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;That's it! Some nice tools to automate label placement and export your maps to various output types. This workflow really can create some beautiful labeling, particularly on maps where you have small groupings of labels.&lt;/p&gt;
-&lt;p&gt;I've included everything from this article, including all of the data, D3 code, and pngs/pdfs, in its own &lt;a href="https://github.com/wrobstory/portlandmapdemo"&gt;Github repo&lt;/a&gt;, so feel free to take a closer look.&lt;/p&gt;</summary><category term="python"></category><category term="maps"></category><category term="dymo"></category><category term="GDAL"></category><category term="D3"></category></entry><entry><title>Vincent Spatial File conversion with Ogre</title><link href="/2013/05/vincent-spatial-ogre.html" rel="alternate"></link><updated>2013-05-02T00:00:00-07:00</updated><author><name>Rob Story</name></author><id>tag:,2013-05-02:2013/05/vincent-spatial-ogre.html</id><summary type="html">&lt;p&gt;Vincent now supports spatial file conversion via the &lt;a href="http://ogre.adc4gis.com/"&gt;Ogre&lt;/a&gt; web tool. Here is a quick example for some shapefiles- the syntax is almost exactly the same as building a normal map, except now you need to pass one additional keyword argument to perform the conversion to geoJSON so that Vincent/Vega can parse it properly. &lt;/p&gt;
+&lt;p&gt;That's it! Some nice tools to automate label placement and export your maps to various output types. This workflow really can create some beautiful labeling, particularly on maps where you have numerous small groupings of labels that need to be separated.&lt;/p&gt;
+&lt;p&gt;I've included everything from this article, including all of the data, D3 code, and PNGs/PDFs, in its own &lt;a href="https://github.com/wrobstory/portlandmapdemo"&gt;Github repo&lt;/a&gt;, so feel free to take a closer look.&lt;/p&gt;</summary><category term="python"></category><category term="maps"></category><category term="dymo"></category><category term="GDAL"></category><category term="D3"></category></entry><entry><title>Vincent Spatial File conversion with Ogre</title><link href="/2013/05/vincent-spatial-ogre.html" rel="alternate"></link><updated>2013-05-02T00:00:00-07:00</updated><author><name>Rob Story</name></author><id>tag:,2013-05-02:2013/05/vincent-spatial-ogre.html</id><summary type="html">&lt;p&gt;Vincent now supports spatial file conversion via the &lt;a href="http://ogre.adc4gis.com/"&gt;Ogre&lt;/a&gt; web tool. Here is a quick example for some shapefiles- the syntax is almost exactly the same as building a normal map, except now you need to pass one additional keyword argument to perform the conversion to geoJSON so that Vincent/Vega can parse it properly. &lt;/p&gt;
 &lt;p&gt;All of the following data was downloaded from the awesome folks at &lt;a href="http://www.naturalearthdata.com/"&gt;Natural Earth&lt;/a&gt;, who provide free vector and raster map data, with all sorts of cultural/physical datasets. In this example, I'm using the zipped shapefiles straight from NE; if you're using your own shapefiles, you need to ensure that the .shp, .dbf, and .shx files are all in the zip. &lt;/p&gt;
 &lt;p&gt;Lets quickly make a map with oceans, land and lakes: &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;vincent&lt;/span&gt;
