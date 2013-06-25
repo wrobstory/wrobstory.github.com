@@ -164,7 +164,7 @@
 
 &lt;p&gt;..and get the following:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="final" src="http://farm4.staticflickr.com/3806/9130557737_eaba296ab6_o.jpg" /&gt;&lt;/p&gt;
-&lt;p&gt;Not bad! This was a tough case- ultimately the information density is just too high for this type of map, and a different approach would be needed to include every single label (or they would have to be culled a bit). If you were curious, here is what the old (red) labels look next to the new (black) Dymo-ized ones:&lt;/p&gt;
+&lt;p&gt;Not bad! This was a tough case- ultimately the information density is just too high for this type of map, and a different approach would be needed to include every single label (or they would have to be culled a bit). If you were curious, here is what the old (red) labels look like next to the new (black) Dymo-ized ones:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="both" src="http://farm6.staticflickr.com/5549/9132768662_4d7dbc08bc_o.jpg" /&gt;&lt;/p&gt;
 &lt;p&gt;As you can see, Dymo did some nice spacing work for us in a lot of places, and eliminated all of our overlaps in the crowded interior as well.&lt;/p&gt;
 &lt;p&gt;Finally, to &lt;a href="http://phantomjs.org/"&gt;PhantomJS&lt;/a&gt;, a headless WebKit engine that can do all sorts of great things, but which I've found very useful for simply converting SVGs to PNG and PDF; this is handy for creating static assets to use in reports or presentations.&lt;/p&gt;
