@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Creating and Publishing Maps with D3, Dymo, and PhantomJS | wrobstory.github.io </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+                    
+      <div class=navigation>
+        <ul>
+                      <li><a href="/index.html">Blog</a> </li>
+                      <li><a href="/archives.html">Archive</a> </li>
+                      <li><a href="/tags.html">Tags</a> </li>
+                  </ul>
+      </div>
+      <div class=separator></div>                
+        <div class=body>
+            <h1 class="title"> Creating and Publishing Maps with D3, Dymo, and PhantomJS</h1>
+    <p class=date> Sat 22 June 2013</p>
+    <p>Problem statement: We want to make a map with D3, automate the label placement, and publish to PDF or PNG. This is a very basic example showing how to put the pieces together- with a little polish and CSS, this workflow can create some great looking maps.</p>
+<p>We'll get neighborhood data from Portland's <a href="http://www.portlandoregon.gov/bts/article/268487">Data Catalog</a>, which comes in the Oregon State Plane coordinate system. I generally convert everything to WGS 84, particularly if there's any chance I'm going to add more layers from different coordinate systems down the road:</p>
+<div class="highlight"><pre><span class="nv">$ </span>ogr2ogr -f GeoJSON <span class="se">\</span>
+          -t_srs EPSG:4326 <span class="se">\</span>
+          neighborhoods.geojson <span class="se">\</span>
+          Neighborhoods_pdx.shp
+</pre></div>
+
+
+<p>One small intermediate step through Python to title-case all of the neighborhood names:</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;neighborhoods.geojson&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">hoods</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">feat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hoods</span><span class="p">[</span><span class="s">&#39;features&#39;</span><span class="p">]):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">feat</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+    <span class="n">hoods</span><span class="p">[</span><span class="s">&#39;features&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">][</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;neighborhoods.geojson&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">hoods</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+
+<p>It's a 1.6MB file, so I'm also going to <a href="https://github.com/mbostock/topojson">TopoJSON</a>-ify it, keeping the 'NAME' property:</p>
+<div class="highlight"><pre><span class="nv">$ </span>topojson -o neighborhoods.topo.json -p NAME -- neighborhoods.geojson
+</pre></div>
+
+
+<p>And now it's at 120.5kb. Let's get some preliminary D3 written, in order to tinker with the projection and get the data centered properly:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">width</span> <span class="o">=</span> <span class="mi">750</span><span class="p">,</span>
+<span class="nx">height</span> <span class="o">=</span> <span class="mi">700</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">projection</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">geo</span><span class="p">.</span><span class="nx">conicConformal</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">rotate</span><span class="p">([</span><span class="mf">120.67</span><span class="p">,</span> <span class="o">-</span><span class="mf">45.52</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">parallels</span><span class="p">([</span><span class="mi">44</span><span class="p">,</span> <span class="mi">46</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">scale</span><span class="p">(</span><span class="mi">125000</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">center</span><span class="p">([</span><span class="o">-</span><span class="mf">1.388</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">translate</span><span class="p">([</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]);</span>
+
+<span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">geo</span><span class="p">.</span><span class="nx">path</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">projection</span><span class="p">(</span><span class="nx">projection</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">svg</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;svg&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="nx">width</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="nx">height</span><span class="p">);</span>
+</pre></div>
+
+
+<p>Then we'll <a href="https://github.com/mbostock/queue">queue</a> it up, add the labels, and see what we have:</p>
+<div class="highlight"><pre><span class="nx">queue</span><span class="p">()</span>
+<span class="p">.</span><span class="nx">defer</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">json</span><span class="p">,</span> <span class="s2">&quot;neighborhoods.topo.json&quot;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">await</span><span class="p">(</span><span class="nx">makeMap</span><span class="p">);</span>
+
+<span class="kd">function</span> <span class="nx">makeMap</span><span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">hoods</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">//For all future TopoJSON-ized data, assume we&#39;re converting it back</span>
+  <span class="c1">//to GeoJSON using the following API call</span>
+  <span class="nx">neighborhoods</span> <span class="o">=</span> <span class="nx">topojson</span><span class="p">.</span><span class="nx">feature</span><span class="p">(</span><span class="nx">hoods</span><span class="p">,</span> <span class="nx">hoods</span><span class="p">.</span><span class="nx">objects</span><span class="p">.</span><span class="nx">neighborhoods</span><span class="p">)</span>
+
+  <span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;neighborhoods&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">neighborhoods</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">)</span>
+
+  <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">neighborhoods</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;translate(&quot;</span> <span class="o">+</span> <span class="nx">path</span><span class="p">.</span><span class="nx">centroid</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">;</span> <span class="p">})</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;.35em&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">properties</span><span class="p">.</span><span class="nx">NAME</span><span class="p">;</span> <span class="p">});</span>
+
+<span class="p">}</span>
+</pre></div>
+
+
+<p><img alt="mapstart" src="http://farm6.staticflickr.com/5546/9130557745_e8c5550738_o.jpg" /></p>
+<p>Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice <a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html">blog post</a> about Dymo, which we'll use as an example of how to prep our data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, which we'll feed to Dymo as our label points along with some other necessary inputs:</p>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="n">hoods</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="s">&#39;neighborhoods.geojson&#39;</span><span class="p">)</span>
+
+<span class="n">layer</span> <span class="o">=</span> <span class="n">hoods</span><span class="o">.</span><span class="n">GetLayer</span><span class="p">(</span><span class="n">iLayer</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+<span class="c">#Get Centroids for each Polygon</span>
+<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">count</span> <span class="o">&lt;</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetFeatureCount</span><span class="p">()):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">feat</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetNextFeature</span><span class="p">()</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">Centroid</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">continue</span>
+    <span class="n">lat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">centroid</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">lng</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat</span><span class="p">[</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c">#Enter parameters into Pandas DataFrame, write to CSV</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;latitude&#39;</span><span class="p">:</span> <span class="n">lat</span><span class="p">,</span> <span class="s">&#39;longitude&#39;</span><span class="p">:</span> <span class="n">lng</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;name&#39;</span>
+<span class="n">df</span><span class="p">[</span><span class="s">&#39;font size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">df</span><span class="p">[</span><span class="s">&#39;font file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;fonts/helvetica.ttf&#39;</span>
+<span class="n">df</span><span class="p">[</span><span class="s">&#39;point size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;dymo_input.csv&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The CSV needs to be in the "data" folder in the Dymo repo, and you need to ensure that you have the correct .ttf font file in the fonts folder of the repo as well.</p>
+<p>There are some requirements for Dymo, namely <a href="https://github.com/stamen/modestmaps-py">Modest Maps</a>, <a href="https://pypi.python.org/pypi/Shapely">Shapely</a>, and <a href="https://pypi.python.org/pypi/pyproj">pyproj</a>. Pyproj is a Cython wrapper for PROJ.4, so if you're looking for projection abbrevs see <a href="http://www.remotesensing.org/geotiff/proj_list/">here</a>. Now cd into the Dymo repo, and set up the call to Dymo:</p>
+<div class="highlight"><pre><span class="nv">$ </span>python dymo-label.py
+         --projection <span class="s2">&quot;+proj=lcc +lat_1=44 +lat_2=46 +lat_0=45.52</span>
+<span class="s2">         +lon_0=-120.62 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs&quot;</span>
+         --scale 30 --minutes 60 --labels-file labels_overlap.json
+         --places-file points.json --include-overlaps
+         data/dymo_input.csv
+</pre></div>
+
+
+<p>The inputs are relatively self-explanatory, and documented well on the Dymo page. First we set up the projection in Lambert Conic Conformal, with the same inputs as we're using for the D3 projection, and output to WGS84. There's some trial-and-error involved with the scale, finally settling on 40 after iterating a couple times. The model was run for 60 minutes, and outputs both the labels and points, including overlapping labels for this case. Output includes the files "points.json", which has the centroid points we fed it, and "labels_overlap.json", which contains the Dymo-ized labels.</p>
+<p>Ok- here is a tricky bit. In the D3 docs, Mike Bostock makes the following very clear:</p>
+<blockquote>
+<p>Important: the inside of a polygon is all points that the polygon winds around in a clockwise order. If your GeoJSON input has polygons in the wrong winding order, you must reverse them, say via ST_ForceRHR; you can also convert your GeoJSON to TopoJSON, and this will happen automatically.</p>
+</blockquote>
+<p>There is a lesson here: when the d3 docs say something is important, pay attention. The Dymo output is in <em>counterclockwise</em> order, and if we don't TopoJSON-ize it, there's going to be trouble later on. Let's do that, and keep the "name" property:</p>
+<div class="highlight"><pre><span class="nv">$ </span>topojson -o labels.topo.json -p name -- labels.json
+</pre></div>
+
+
+<p>Here's the D3 to plot labels and points:</p>
+<div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.symbol&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">points</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;symbol&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">pointRadius</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+
+<span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">dymo_overlapping_labels</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">)</span>
+</pre></div>
+
+
+<p>...and the result:</p>
+<p><img alt="prelim2" src="http://farm8.staticflickr.com/7303/9130557659_4c77d6f634_o.jpg" /></p>
+<p>Cool! Dymo has done its best to resolve as many of the overlapping labels as it could. Unfortunately, the information density on this map is just too high- I think that even placing labels by hand we would be hard pressed to fit some of them in the map, and they would need to be moved to a legend, popover, or leading line. For the purposes of this demo, I'm going to run dymo again without passing the "--include-overlaps" parameter, so that overlapping regions will be excluded.</p>
+<p>With the resulting output, we're going to bind the text to the centroid of each label box that Dymo produces (and we'll get rid of the boxes themselves):</p>
+<div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">dymo_labels</span><span class="p">.</span><span class="nx">features</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span><span class="k">return</span> <span class="s2">&quot;translate(&quot;</span> <span class="o">+</span> <span class="nx">path</span><span class="p">.</span><span class="nx">centroid</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">;</span> <span class="p">})</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;.35em&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">d</span><span class="p">.</span><span class="nx">properties</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span> <span class="p">});</span>
+</pre></div>
+
+
+<p>..and get the following:</p>
+<p><img alt="final" src="http://farm4.staticflickr.com/3806/9130557737_eaba296ab6_o.jpg" /></p>
+<p>Not bad! This was a tough case- ultimately the information density is just too high for this type of map, and a different approach would be needed to include every single label (or they would have to be culled a bit). If you were curious, here is what the old (red) labels look next to the new (black) Dymo-ized ones:</p>
+<p><img alt="both" src="http://farm6.staticflickr.com/5549/9132768662_4d7dbc08bc_o.jpg" /></p>
+<p>As you can see, Dymo did some nice spacing work for us in a lot of places, and eliminated all of our overlaps in the crowded interior as well.</p>
+<p>Finally, to <a href="http://phantomjs.org/">PhantomJS</a>, a headless WebKit engine that can do all sorts of great things, but which I've found very useful for simply converting SVGs to PNG and PDF; this is handy for creating static assets to use in reports or presentations.</p>
+<p>To start, I'm using the <a href="https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js">rasterize.js</a> script included in the examples. Second, I've found that PNGs render best when you append a background to your SVG (if you don't want transparency as the background, that is). A quick D3 append that I CSS-fill to white:</p>
+<div class="highlight"><pre><span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;rect&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;background&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="nx">width</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="nx">height</span><span class="p">);</span>
+</pre></div>
+
+
+<p>and then a quick shell command on your map running in localhost (PhantomJS also renders to JPEG and GIF, see the <a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture">docs</a>):</p>
+<div class="highlight"><pre><span class="nv">$ </span>phantomjs rasterize.js http://localhost:8000/index.html mymap.png
+</pre></div>
+
+
+<p>...and out comes a rather nice looking PNG- all of the images in this article were created using PhantomJS.</p>
+<p>Finally, it will also produce PDFs, which will even take some paper format commands:</p>
+<div class="highlight"><pre><span class="nv">$ </span>phantomjs rasterize.js http://localhost:8000/index.html mymap.pdf <span class="s2">&quot;Letter&quot;</span>
+</pre></div>
+
+
+<p>That's it! Some nice tools to automate label placement and export your maps to various output types. This workflow really can create some beautiful labeling, particularly on maps where you have small groupings of labels.</p>
+<p>I've included everything from this article, including all of the data, D3 code, and pngs/pdfs, in its own <a href="https://github.com/wrobstory/portlandmapdemo">Github repo</a>, so feel free to take a closer look.</p>
+
+    <div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+        <p class=tags>This entry was tagged as
+            <a href="/tag/python.html">python</a>
+            <a href="/tag/maps.html">maps</a>
+            <a href="/tag/dymo.html">dymo</a>
+            <a href="/tag/gdal.html">GDAL</a>
+            <a href="/tag/d3.html">D3</a>
+          </p>
+            </div>
+        
+                    <div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p>
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + 'wrobstory' + '@' + 'gmail.com' + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/oceankidbilly" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+<!--         <a href="www.linkedin.com/pub/rob-story/12/a49/b21"><li><i class="icon-linkedin-sign icon-large" ></i></li></a> -->
+        <a href="http://github.com/wrobstory" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+<!--         <a href="/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a> -->
+      </ul>
+    </div>
+  </p>
+</div>            </div>
+        <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39972069-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+      </body>
+</html>
