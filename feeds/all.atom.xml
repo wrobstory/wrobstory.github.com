@@ -78,7 +78,7 @@
 
 
 &lt;p&gt;&lt;img alt="mapstart" src="http://farm6.staticflickr.com/5546/9130557745_e8c5550738_o.jpg" /&gt;&lt;/p&gt;
-&lt;p&gt;Kind of a mess. Let's get Dymo going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice &lt;a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html"&gt;blog post&lt;/a&gt; about Dymo, which we'll use as an example of how to prep the data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, then feed them to Dymo as our lat/lng along with some other necessary inputs:&lt;/p&gt;
+&lt;p&gt;Kind of a mess. Let's get &lt;a href="https://github.com/migurski/Dymo"&gt;Dymo&lt;/a&gt; going- we'll first need to prep some input. The mapping folks at the National Park Service wrote a nice &lt;a href="http://www.nps.gov/npmap/blog/improving-park-label-placement-with-dymo-and-tilemill.html"&gt;blog post&lt;/a&gt; about Dymo, which we'll use as an example of how to prep the data. Let's use the GDAL Python bindings to get the centroids for each neighborhood, then feed them to Dymo as our lat/lng along with some other necessary inputs:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;osgeo&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;ogr&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
 
