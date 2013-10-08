@@ -12,19 +12,20 @@
   </head>
   <body>
     <div class=container>
-                    
+
       <div class=navigation>
         <ul>
-                      <li><a href="/index.html">Blog</a> </li>
-                      <li><a href="/archives.html">Archive</a> </li>
-                      <li><a href="/tags.html">Tags</a> </li>
-                  </ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
       </div>
-      <div class=separator></div>                
+      <div class=separator></div>        
         <div class=body>
-            <h1 class="title"> Creating Map Visualizations in <10 lines of Python</h1>
+    <h1 class="title"> Creating Map Visualizations in <10 lines of Python</h1>
     <p class=date> Mon 29 April 2013</p>
-    <div class="highlight"><pre><span class="kn">import</span> <span class="nn">vincent</span>
+    <p>13-10-07 Update: Please see the <a href="https://vincent.readthedocs.org/en/latest/">Vincent docs</a> for updated map plotting syntax. A new post about maps (with improved examples!) can be found <a href="http://wrobstory.github.io/2013/10/mapping-data-python.html">here</a>.</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">vincent</span>
 <span class="n">world_countries</span> <span class="o">=</span> <span class="s">r&#39;world-countries.json&#39;</span>
 <span class="n">world</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">world</span><span class="o">.</span><span class="n">geo_data</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s">&#39;winkel3&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">world</span><span class="o">=</span><span class="n">world_countries</span><span class="p">)</span>
@@ -61,7 +62,7 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 </pre></div>
 
 
-<p><img alt="Chloropleth" src="http://farm9.staticflickr.com/8543/8692026644_a1ee888398_z.jpg" /></p>
+<p><img alt="Choropleth" src="http://farm9.staticflickr.com/8543/8692026644_a1ee888398_z.jpg" /></p>
 <p>This isn't without a little data wrangling and transformation- the user needs to ensure that there is a 1:1 mapping of keys in the geoJSON to row keys in the Pandas DataFrame. Here is what was required to get a clean DataFrame for mapping for the previous example: our county data is a csv with <a href="http://en.wikipedia.org/wiki/Federal_Information_Processing_Standard">FIPS</a> code, county name, and our economic data (column names withheld):</p>
 <div class="highlight"><pre><span class="mo">00000</span><span class="p">,</span><span class="n">US</span><span class="p">,</span><span class="n">United</span> <span class="n">States</span><span class="p">,</span><span class="mi">154505871</span><span class="p">,</span><span class="mi">140674478</span><span class="p">,</span><span class="mi">13831393</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">50502</span><span class="p">,</span><span class="mi">100</span>
 <span class="mo">01000</span><span class="p">,</span><span class="n">AL</span><span class="p">,</span><span class="n">Alabama</span><span class="p">,</span><span class="mi">2190519</span><span class="p">,</span><span class="mi">1993977</span><span class="p">,</span><span class="mi">196542</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">41427</span><span class="p">,</span><span class="mi">100</span>
@@ -158,18 +159,18 @@ wanted something a little simpler, that relies on the power of <a href="http://t
 <p><img alt="State Unemployment" src="http://farm9.staticflickr.com/8541/8695302818_4c83792642_z.jpg" /></p>
 <p>Maps are a passion of mine- this is one area where I really want to make Vincent very strong, including the ability to easily add points, markers, etc. If you the reader have any features you would like to see with regarding to mapping, please post an issue on <a href="https://github.com/wrobstory/vincent/issues">Github</a></p>
 
-    <div class=twitter>
+<div class=twitter>
 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </div>
-        <p class=tags>This entry was tagged as
-            <a href="/tag/python.html">python</a>
-            <a href="/tag/maps.html">maps</a>
-            <a href="/tag/vincent.html">vincent</a>
-          </p>
-            </div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/maps.html">maps</a>
+      <a href="/tag/vincent.html">vincent</a>
+    </p>
+        </div>
         
-                    <div class=footer>
+<div class=footer>
   <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
   <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
     <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
@@ -191,8 +192,8 @@ wanted something a little simpler, that relies on the power of <a href="http://t
       </ul>
     </div>
   </p>
-</div>            </div>
-        <script type="text/javascript">
+</div>    </div>
+    <script type="text/javascript">
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-39972069-1']);
       _gaq.push(['_trackPageview']);
@@ -203,5 +204,5 @@ wanted something a little simpler, that relies on the power of <a href="http://t
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-      </body>
+  </body>
 </html>

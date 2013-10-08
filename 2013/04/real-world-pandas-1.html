@@ -12,50 +12,50 @@
   </head>
   <body>
     <div class=container>
-                    
+
       <div class=navigation>
         <ul>
-                      <li><a href="/index.html">Blog</a> </li>
-                      <li><a href="/archives.html">Archive</a> </li>
-                      <li><a href="/tags.html">Tags</a> </li>
-                  </ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
       </div>
-      <div class=separator></div>                
+      <div class=separator></div>        
         <div class=body>
-            <h1 class="title"> Real world Pandas: Binning and Grouping</h1>
+    <h1 class="title"> Real world Pandas: Binning and Grouping</h1>
     <p class=date> Wed 03 April 2013</p>
-    <p>I would have a hard time working without the <a href="http://pandas.pydata.org/">Pandas</a> library at this point. I spend a lot of time munging and anayzing tabular data, and pandas is a critical part of my workflow. I wanted to quickly demonstrate a couple small pieces of code from my side project <a href="https://github.com/wrobstory/climatic">climatic</a> that show the relative power 
-of pandas, then dive into the guts of what's happening behind the scenes. </p>
-<p>If you are interested in tinkering with the data used in this example, see the <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. There are a couple example scripts in there as well that outline how to use climatic to manipulate the data. </p>
-<p>First lets use climatic to import the data via a thin wrapper around pandas read_table that has some column header parsing conveniences: </p>
+    <p>I would have a hard time working without the <a href="http://pandas.pydata.org/">Pandas</a> library at this point. I spend a lot of time munging and anayzing tabular data, and pandas is a critical part of my workflow. I wanted to quickly demonstrate a couple small pieces of code from my side project <a href="https://github.com/wrobstory/climatic">climatic</a> that show the relative power
+of pandas, then dive into the guts of what's happening behind the scenes.</p>
+<p>If you are interested in tinkering with the data used in this example, see the <a href="https://github.com/wrobstory/climatic/tree/master/examples">examples</a> folder in the climatic repo. There are a couple example scripts in there as well that outline how to use climatic to manipulate the data.</p>
+<p>First lets use climatic to import the data via a thin wrapper around pandas read_table that has some column header parsing conveniences:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">climatic</span> <span class="kn">as</span> <span class="nn">cl</span>
 
 <span class="n">walsenburg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">MetMast</span><span class="p">()</span>
-<span class="n">walsenburg</span><span class="o">.</span><span class="n">wind_import</span><span class="p">(</span><span class="s">r&#39;CO_Walsenburg_South_Data.txt&#39;</span><span class="p">,</span> 
-                       <span class="n">header_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+<span class="n">walsenburg</span><span class="o">.</span><span class="n">wind_import</span><span class="p">(</span><span class="s">r&#39;CO_Walsenburg_South_Data.txt&#39;</span><span class="p">,</span>
+                       <span class="n">header_row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                        <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">smart_headers</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Climatic will parse the headers into tuples with an attribute and a height, for manipulating later with a pandas MultiIndex. Next, lets bin all of the data by wind frequency:</p>
 <div class="highlight"><pre><span class="n">freq_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">375</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
-<span class="n">walsenburg</span><span class="o">.</span><span class="n">binned</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;WD Mean 1&#39;</span><span class="p">,</span> <span class="mi">49</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">freq_bins</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">,</span> 
+<span class="n">walsenburg</span><span class="o">.</span><span class="n">binned</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;WD Mean 1&#39;</span><span class="p">,</span> <span class="mi">49</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">freq_bins</span><span class="p">,</span> <span class="n">stat</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">,</span>
                   <span class="n">plot</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
 </pre></div>
 
 
-<p>This will give us a matplotlib plot of the WS Mean 1 signal, averaged by sector: 
+<p>This will give us a matplotlib plot of the WS Mean 1 signal, averaged by sector:
 <img alt="freq_rose" src="http://farm9.staticflickr.com/8242/8618644004_4863172421_o.png" /></p>
-<p>So, what's happening behind the scenes here? Less than 20 lines of core code make it all happen. First, lets grab a subset of our data to make following this easier, then use numpy to set up a little mapper: </p>
+<p>So, what's happening behind the scenes here? Less than 20 lines of core code make it all happen. First, lets grab a subset of our data to make following this easier, then use numpy to set up a little mapper:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="c">#Turn a few columns into a new DataFrame</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;Wind Speed 1&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span> 
-                     <span class="s">&#39;Wind Speed 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 2&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span> 
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;Wind Speed 1&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 1&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span>
+                     <span class="s">&#39;Wind Speed 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WS Mean 2&#39;</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)],</span>
                      <span class="s">&#39;Wind Dir 1&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WD Mean 1&#39;</span><span class="p">,</span> <span class="mf">49.0</span><span class="p">)],</span>
-                     <span class="s">&#39;Wind Dir 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WD Mean 2&#39;</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">)]},</span> 
+                     <span class="s">&#39;Wind Dir 2&#39;</span><span class="p">:</span> <span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="s">&#39;WD Mean 2&#39;</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">)]},</span>
                      <span class="n">index</span><span class="o">=</span><span class="n">walsenburg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
 <span class="c">#Write a short mapper that bins data</span>
@@ -70,7 +70,7 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 
 
 <p>np.digitize is doing our heavy lifting, by bracketing our x value in the bin. The kwargs are necessary in order to address the edge case where x and the max bin are the same, and thus to include it we need to set right=True in np.digitize.</p>
-<p>Lets check our mapper: </p>
+<p>Lets check our mapper:</p>
 <div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">map_bin</span><span class="p">(</span><span class="mi">274</span><span class="p">,</span> <span class="n">freq_bins</span><span class="p">)</span>
 <span class="s">&#39;[270-285]&#39;</span>
 <span class="o">&gt;&gt;&gt;</span><span class="n">map_bin</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">freq_bins</span><span class="p">)</span> <span class="c">#np.digitize defaults to right=False</span>
@@ -83,7 +83,7 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 <p>Now lets map it to our data:</p>
 <div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
                          <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
-<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                                                      
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>         <span class="mi">261</span>         <span class="mf">12.05</span>         <span class="mf">12.26</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">244</span>         <span class="mi">258</span>         <span class="mf">11.48</span>         <span class="mf">11.60</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>         <span class="mi">260</span>         <span class="mf">14.19</span>         <span class="mf">14.39</span>
@@ -99,7 +99,7 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 <span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;Binned&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Wind Dir 1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">map_bin</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">freq_bins</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span><span class="n">data</span><span class="p">[[</span><span class="s">&#39;Wind Dir 1&#39;</span><span class="p">,</span><span class="s">&#39;Binned&#39;</span><span class="p">]][:</span><span class="mi">10</span><span class="p">]</span>
                          <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>     <span class="n">Binned</span>
-<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>                         
+<span class="n">Date</span> <span class="o">&amp;</span> <span class="n">Time</span> <span class="n">Stamp</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">244</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
 <span class="mi">2010</span><span class="o">-</span><span class="mo">06</span><span class="o">-</span><span class="mo">01</span> <span class="mi">14</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mo">00</span>         <span class="mi">245</span>  <span class="p">[</span><span class="mi">240</span><span class="o">-</span><span class="mi">255</span><span class="p">]</span>
@@ -113,12 +113,12 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 </pre></div>
 
 
-<p>Finally, lets group the data by 'Binned' and average the data for each bin: </p>
+<p>Finally, lets group the data by 'Binned' and average the data for each bin:</p>
 <div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">grouped</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s">&#39;Binned&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span> 
+<span class="o">&gt;&gt;&gt;</span><span class="n">grouped_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
                <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
-<span class="n">Binned</span>                                                       
+<span class="n">Binned</span>
 <span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>       <span class="mf">6.822575</span>   <span class="mf">31.094926</span>      <span class="mf">4.573297</span>      <span class="mf">4.371899</span>
 <span class="p">[</span><span class="mi">105</span><span class="o">-</span><span class="mi">120</span><span class="p">]</span>  <span class="mf">111.928729</span>  <span class="mf">132.076001</span>      <span class="mf">5.626556</span>      <span class="mf">6.024371</span>
 <span class="p">[</span><span class="mi">120</span><span class="o">-</span><span class="mi">135</span><span class="p">]</span>  <span class="mf">126.822383</span>  <span class="mf">146.176534</span>      <span class="mf">5.613520</span>      <span class="mf">5.835964</span>
@@ -160,7 +160,7 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 </pre></div>
 
 
-<p>Voila! All of the data has been grouped by frequency, taking a mean of the data within any one bin. We could have also grouped by max: </p>
+<p>Voila! All of the data has been grouped by frequency, taking a mean of the data within any one bin. We could have also grouped by max:</p>
 <div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span><span class="n">grouped_max</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
                <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Dir</span> <span class="mi">2</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">1</span>  <span class="n">Wind</span> <span class="n">Speed</span> <span class="mi">2</span>
 <span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>             <span class="mi">14</span>         <span class="mi">359</span>         <span class="mf">19.67</span>         <span class="mf">18.40</span>
@@ -190,21 +190,21 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
 </pre></div>
 
 
-<p>Ahhhh the magic of Pandas. </p>
+<p>Ahhhh the magic of Pandas.</p>
 
-    <div class=twitter>
+<div class=twitter>
 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </div>
-        <p class=tags>This entry was tagged as
-            <a href="/tag/python.html">python</a>
-            <a href="/tag/wind-data.html">wind data</a>
-            <a href="/tag/pandas.html">pandas</a>
-            <a href="/tag/.html"></a>
-          </p>
-            </div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/wind-data.html">wind data</a>
+      <a href="/tag/pandas.html">pandas</a>
+      <a href="/tag/.html"></a>
+    </p>
+        </div>
         
-                    <div class=footer>
+<div class=footer>
   <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
   <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
     <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
@@ -226,8 +226,8 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
       </ul>
     </div>
   </p>
-</div>            </div>
-        <script type="text/javascript">
+</div>    </div>
+    <script type="text/javascript">
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-39972069-1']);
       _gaq.push(['_trackPageview']);
@@ -238,5 +238,5 @@ of pandas, then dive into the guts of what's happening behind the scenes. </p>
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-      </body>
+  </body>
 </html>

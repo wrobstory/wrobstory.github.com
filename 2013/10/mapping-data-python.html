@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title> Mapping Data in Python with Pandas and Vincent | wrobstory.github.io </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+  </head>
+  <body>
+    <div class=container>
+
+      <div class=navigation>
+        <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
+      </div>
+      <div class=separator></div>        
+        <div class=body>
+    <h1 class="title"> Mapping Data in Python with Pandas and Vincent</h1>
+    <p class=date> Tue 08 October 2013</p>
+    <p>One area where the Pandas/Vincent workflow really shines is in Data Exploration- rapidly iterating DataFrames with Vincent visualizations to explore your data and find the best visual representation. With the release of Vincent 0.3, you can now also rapidly iterate maps to visualize your data.</p>
+<p>Disclaimer: there are certainly still some deficiencies in Vega.js that make building production-quality maps tough. The tools to perform more detailed projection manipulations are still lacking (though it wouldnt take much work to the right pipes hooked up). For high quality map publishing, I still recommend using raw D3. However, for very quick exploration with Python data, it's tough to beat Vincent/Vega.</p>
+<p>Let's start with a very simple map of the world to show how to add a map chart in Vincent. All of the geodata here can be found in the <a href="https://github.com/wrobstory/vincent_map_data">vincent_map_data</a> repo.</p>
+<p>A simple map of the world:</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">vincent</span>
+<span class="n">geo_data</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;countries&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">world_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;world-countries&#39;</span><span class="p">}]</span>
+
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">geo_data</span><span class="o">=</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s">&#39;vega.json&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="simplemap" src="http://farm3.staticflickr.com/2852/10140081393_fa46545724_c.jpg" /></p>
+<p>Vincent also allows for passing multiple map layers:</p>
+<div class="highlight"><pre><span class="n">geo_data</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;counties&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">county_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;us_counties.geo&#39;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;states&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">state_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;us_states.geo&#39;</span><span class="p">}</span>
+             <span class="p">]</span>
+
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">geo_data</span><span class="o">=</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">)</span>
+<span class="c">#Get rid of State fill, customize stroke color</span>
+<span class="k">del</span> <span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;#084081&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">enter</span><span class="o">.</span><span class="n">stroke</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;#fff&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">enter</span><span class="o">.</span><span class="n">stroke</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;#7bccc4&#39;</span>
+</pre></div>
+
+
+<p><img alt="statescounties" src="http://farm4.staticflickr.com/3797/10140037456_8256fbd32d_c.jpg" /></p>
+<p>Now to the data exploration: mapping data in Pandas DataFrames to TopoJSON to create a choropleth visualization. First, some mild data munging to ensure that your data will key correctly with the TopoJSON properties:</p>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="c">#Map the county codes we have in our geometry to those in the</span>
+<span class="c">#county_data file, which contains additional rows we don&#39;t need</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;us_counties.topo.json&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">get_id</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c">#A little FIPS code type casting to ensure keys match</span>
+<span class="n">new_geoms</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">get_id</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">][</span><span class="s">&#39;us_counties.geo&#39;</span><span class="p">][</span><span class="s">&#39;geometries&#39;</span><span class="p">]:</span>
+    <span class="n">geom</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;FIPS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">geom</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;FIPS&#39;</span><span class="p">])</span>
+    <span class="n">new_geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+
+<span class="n">get_id</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">][</span><span class="s">&#39;us_counties.geo&#39;</span><span class="p">][</span><span class="s">&#39;geometries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_geoms</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;us_counties.topo.json&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">get_id</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+<span class="c">#Grab the FIPS codes and load them into a dataframe</span>
+<span class="n">geometries</span> <span class="o">=</span> <span class="n">get_id</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">][</span><span class="s">&#39;us_counties.geo&#39;</span><span class="p">][</span><span class="s">&#39;geometries&#39;</span><span class="p">]</span>
+<span class="n">county_codes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;FIPS&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">geometries</span><span class="p">]</span>
+<span class="n">county_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;FIPS&#39;</span><span class="p">:</span> <span class="n">county_codes</span><span class="p">},</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="n">county_df</span> <span class="o">=</span> <span class="n">county_df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c">#Read county unemployment data into Dataframe, cast to int for consistency</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">&#39;data/us_county_data.csv&#39;</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s">&#39; &#39;</span><span class="p">])</span>
+<span class="n">df</span><span class="p">[</span><span class="s">&#39;FIPS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s">&#39;FIPS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c">#Perform an inner join, pad NA&#39;s with data from nearest county</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">county_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s">&#39;FIPS&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s">&#39;inner&#39;</span><span class="p">)</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;pad&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Now we can set up our map:</p>
+<div class="highlight"><pre><span class="n">geo_data</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;counties&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">county_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;us_counties.geo&#39;</span><span class="p">}]</span>
+
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">merged</span><span class="p">,</span> <span class="n">geo_data</span><span class="o">=</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1100</span><span class="p">,</span>
+                  <span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">,</span> <span class="n">data_bind</span><span class="o">=</span><span class="s">&#39;Employed_2011&#39;</span><span class="p">,</span>
+                  <span class="n">data_key</span><span class="o">=</span><span class="s">&#39;FIPS&#39;</span><span class="p">,</span> <span class="n">map_key</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;counties&#39;</span><span class="p">:</span> <span class="s">&#39;properties.FIPS&#39;</span><span class="p">})</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">enter</span><span class="o">.</span><span class="n">stroke_opacity</span> <span class="o">=</span> <span class="n">ValueRef</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="c">#Change our domain for an even inteager</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">189000</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s">&#39;Number Employed 2011&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s">&#39;vega.json&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="numberemp" src="http://farm8.staticflickr.com/7436/10150074823_370c2900b6_c.jpg" /></p>
+<p>Vincent defaults your scale to a quantize scale between [0, column.quantile(0.95)], but
+custom scales are encouraged:</p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&#39;threshold&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">40000</span><span class="p">,</span> <span class="mi">70000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">,</span> <span class="mi">130000</span><span class="p">,</span> <span class="mi">160000</span><span class="p">]</span>
+</pre></div>
+
+
+<p><img alt="custom" src="http://farm4.staticflickr.com/3709/10149840234_828af7afa5_c.jpg" /></p>
+<p>Data can be quickly rebound with new columns and new color brewer scales to rapidly visualize different columns of the DataFrame:</p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">&#39;Unemployed_2011&#39;</span><span class="p">,</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;PuBu&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">18000</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legends</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Number Unemployed 2011&#39;</span>
+</pre></div>
+
+
+<p><img alt="unemp_2011" src="http://farm4.staticflickr.com/3788/10149986164_d3c63afcf7_c.jpg" /></p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">&#39;Unemployment_rate_2011&#39;</span><span class="p">,</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;YlGnBu&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legends</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Unemployment % 2011&#39;</span>
+</pre></div>
+
+
+<p><img alt="unemp_pct" src="http://farm6.staticflickr.com/5507/10149839914_db9ae705be_c.jpg" /></p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">&#39;Median_Household_Income_2011&#39;</span><span class="p">,</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;RdPu&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s">&#39;color&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">64000</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legends</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Median Household Income, $&#39;</span>
+</pre></div>
+
+
+<p><img alt="median_income" src="http://farm6.staticflickr.com/5450/10150095786_ff1143a4b6_c.jpg" /></p>
+<p>Let's run through a quick example at the state level, looking at a bar chart first:</p>
+<div class="highlight"><pre><span class="n">yoy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s">&#39;data/State_Unemp_YoY.txt&#39;</span><span class="p">,</span> <span class="n">delim_whitespace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c">#Standardize State names to match TopoJSON for keying</span>
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">yoy</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;AUG_2012&#39;</span><span class="p">],</span> <span class="n">key_on</span><span class="o">=</span><span class="s">&#39;NAME&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">AxisProperties</span><span class="p">(</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">PropertySet</span><span class="p">(</span>
+        <span class="n">angle</span><span class="o">=</span><span class="n">ValueRef</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">45</span><span class="p">),</span>
+        <span class="n">align</span><span class="o">=</span><span class="n">ValueRef</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s">&#39;left&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">padding</span><span class="p">[</span><span class="s">&#39;bottom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">90</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">axis_titles</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s">&#39;Unemployment %&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s">&#39;vega.json&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="unemp_bar" src="http://farm6.staticflickr.com/5524/10150049253_0cef77e679_c.jpg" /></p>
+<p>Now we can look at the geo:</p>
+<div class="highlight"><pre><span class="c">#Make sure names match TopoJSON</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">yoy</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">together</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span>
+    <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">together</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+<span class="n">yoy</span><span class="p">[</span><span class="s">&#39;NAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span>
+
+<span class="n">geo_data</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;states&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">state_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;us_states.geo&#39;</span><span class="p">}]</span>
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">yoy</span><span class="p">,</span> <span class="n">geo_data</span><span class="o">=</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                  <span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">,</span> <span class="n">data_bind</span><span class="o">=</span><span class="s">&#39;AUG_2012&#39;</span><span class="p">,</span> <span class="n">data_key</span><span class="o">=</span><span class="s">&#39;NAME&#39;</span><span class="p">,</span>
+                  <span class="n">map_key</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;states&#39;</span><span class="p">:</span> <span class="s">&#39;properties.NAME&#39;</span><span class="p">},</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;YlGnBu&#39;</span><span class="p">)</span>
+<span class="c">#Custom threshold scale</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="o">=</span><span class="s">&#39;threshold&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s">&#39;Unemployment Aug 2012 (%)&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s">&#39;vega.json&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="aug_2012" src="http://farm6.staticflickr.com/5501/10150049343_f08f390e45_c.jpg" /></p>
+<p>Rebind and revisualize:</p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">&#39;AUG_2013&#39;</span><span class="p">,</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;YlGnBu&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="o">=</span><span class="s">&#39;threshold&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legends</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Unemployment Aug 2013 %&#39;</span>
+</pre></div>
+
+
+<p><img alt="aug_2013" src="http://farm4.staticflickr.com/3669/10150049293_31f3815161_c.jpg" /></p>
+<p>Finally, the % change Year over Year:</p>
+<div class="highlight"><pre><span class="n">vis</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s">&#39;CHANGE&#39;</span><span class="p">,</span> <span class="n">brew</span><span class="o">=</span><span class="s">&#39;YlGnBu&#39;</span><span class="p">)</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="o">=</span><span class="s">&#39;threshold&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">legends</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&quot;YoY Change in Unemployment (%)&quot;</span>
+</pre></div>
+
+
+<p><img alt="yoy" src="http://farm4.staticflickr.com/3726/10149815284_d2049a51fe_c.jpg" /></p>
+<p>One more example, this one showing where Vega falls a bit short at the moment. This was about the best I could do to map Oregon county populations:</p>
+<div class="highlight"><pre><span class="c">#Oregon County-level population data</span>
+<span class="n">or_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s">&#39;data/OR_County_Data.txt&#39;</span><span class="p">,</span> <span class="n">delim_whitespace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">or_data</span><span class="p">[</span><span class="s">&#39;July_2012_Pop&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">or_data</span><span class="p">[</span><span class="s">&#39;July_2012_Pop&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="c">#Standardize keys</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;or_counties.topo.json&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">counties</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">split_county</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">parts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+<span class="c">#A little FIPS code munging</span>
+<span class="n">new_geoms</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">counties</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">][</span><span class="s">&#39;or_counties.geo&#39;</span><span class="p">][</span><span class="s">&#39;geometries&#39;</span><span class="p">]:</span>
+    <span class="n">geom</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;COUNTY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">split_county</span><span class="p">(</span><span class="n">geom</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="s">&#39;COUNTY&#39;</span><span class="p">])</span>
+    <span class="n">new_geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+
+<span class="n">counties</span><span class="p">[</span><span class="s">&#39;objects&#39;</span><span class="p">][</span><span class="s">&#39;or_counties.geo&#39;</span><span class="p">][</span><span class="s">&#39;geometries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_geoms</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;or_counties.topo.json&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">counties</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+<span class="n">geo_data</span> <span class="o">=</span> <span class="p">[{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;states&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">state_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;us_states.geo&#39;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;or_counties&#39;</span><span class="p">,</span>
+             <span class="s">&#39;url&#39;</span><span class="p">:</span> <span class="n">or_topo</span><span class="p">,</span>
+             <span class="s">&#39;feature&#39;</span><span class="p">:</span> <span class="s">&#39;or_counties.geo&#39;</span><span class="p">}]</span>
+
+<span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">or_data</span><span class="p">,</span> <span class="n">geo_data</span><span class="o">=</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">3700</span><span class="p">,</span>
+                  <span class="n">translate</span><span class="o">=</span><span class="p">[</span><span class="mi">1480</span><span class="p">,</span> <span class="mi">830</span><span class="p">],</span> <span class="n">projection</span><span class="o">=</span><span class="s">&#39;albersUsa&#39;</span><span class="p">,</span>
+                  <span class="n">data_bind</span><span class="o">=</span><span class="s">&#39;July_2012_Pop&#39;</span><span class="p">,</span> <span class="n">data_key</span><span class="o">=</span><span class="s">&#39;NAME&#39;</span><span class="p">,</span>
+                  <span class="n">map_key</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;or_counties&#39;</span><span class="p">:</span> <span class="s">&#39;properties.COUNTY&#39;</span><span class="p">})</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">marks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;#c2c2c2&#39;</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s">&#39;vega.json&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="or" src="http://farm3.staticflickr.com/2871/10150049473_f216ce0007_c.jpg" /></p>
+<p>Of course, albersUsa isn't the right projection to just get the state- we really probably want something like conicConformal. Also, to properly center correctly, Vega needs to take D3.geo parameters such as parallels and a rotation array (right now it takes a single number).</p>
+<p>So- once you've got your data in the right format, and your geodata properly
+TopoJSONized, Vincent + Pandas can allow for rapid iteration of geo visualizations. Happy mapmaking!</p>
+
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/maps.html">maps</a>
+      <a href="/tag/pandas.html">pandas</a>
+      <a href="/tag/vincent.html">vincent</a>
+    </p>
+        </div>
+        
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p>
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + 'wrobstory' + '@' + 'gmail.com' + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/oceankidbilly" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+<!--         <a href="www.linkedin.com/pub/rob-story/12/a49/b21"><li><i class="icon-linkedin-sign icon-large" ></i></li></a> -->
+        <a href="http://github.com/wrobstory" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+<!--         <a href="/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a> -->
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39972069-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

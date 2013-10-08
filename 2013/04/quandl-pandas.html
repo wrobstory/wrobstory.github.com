@@ -12,31 +12,31 @@
   </head>
   <body>
     <div class=container>
-                    
+
       <div class=navigation>
         <ul>
-                      <li><a href="/index.html">Blog</a> </li>
-                      <li><a href="/archives.html">Archive</a> </li>
-                      <li><a href="/tags.html">Tags</a> </li>
-                  </ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
       </div>
-      <div class=separator></div>                
+      <div class=separator></div>        
         <div class=body>
-            <h1 class="title"> Quandl and Pandas</h1>
+    <h1 class="title"> Quandl and Pandas</h1>
     <p class=date> Sat 27 April 2013</p>
-    <p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types of data as the columns. Right now the data is split up on a state-by-state basis (rather than all 50 states as a single table of data), so I wrote a small snippet to grab each state for a given date, then concat them all into a complete Pandas DataFrame: </p>
+    <p>The folks at <a href="http://www.quandl.com/">Quandl</a> have built a nice little <a href="http://www.quandl.com/help/python">python interface</a> for accessing their data and getting it into Pandas. My goal was to grab some data for all 50 states for a given date and get it into a DataFrame with the states as the index and different types of data as the columns. Right now the data is split up on a state-by-state basis (rather than all 50 states as a single table of data), so I wrote a small snippet to grab each state for a given date, then concat them all into a complete Pandas DataFrame:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">Quandl</span>
 <span class="kn">import</span> <span class="nn">vincent</span>
 
 <span class="n">abbvs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;AK&#39;</span><span class="p">,</span> <span class="s">&#39;AZ&#39;</span><span class="p">,</span> <span class="s">&#39;AR&#39;</span><span class="p">,</span> <span class="s">&#39;CA&#39;</span><span class="p">,</span> <span class="s">&#39;CO&#39;</span><span class="p">,</span> <span class="s">&#39;CT&#39;</span><span class="p">,</span> <span class="s">&#39;DE&#39;</span><span class="p">,</span> <span class="s">&#39;FL&#39;</span><span class="p">,</span> <span class="s">&#39;GA&#39;</span><span class="p">,</span> <span class="s">&#39;HI&#39;</span><span class="p">,</span> <span class="s">&#39;ID&#39;</span><span class="p">,</span>
-         <span class="s">&#39;IL&#39;</span><span class="p">,</span> <span class="s">&#39;IN&#39;</span><span class="p">,</span> <span class="s">&#39;IA&#39;</span><span class="p">,</span> <span class="s">&#39;KS&#39;</span><span class="p">,</span> <span class="s">&#39;KY&#39;</span><span class="p">,</span> <span class="s">&#39;LA&#39;</span><span class="p">,</span> <span class="s">&#39;ME&#39;</span><span class="p">,</span> <span class="s">&#39;MD&#39;</span><span class="p">,</span> <span class="s">&#39;MA&#39;</span><span class="p">,</span> <span class="s">&#39;MI&#39;</span><span class="p">,</span> <span class="s">&#39;MN&#39;</span><span class="p">,</span> 
-         <span class="s">&#39;MS&#39;</span><span class="p">,</span> <span class="s">&#39;MO&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">,</span> <span class="s">&#39;NE&#39;</span><span class="p">,</span> <span class="s">&#39;NV&#39;</span><span class="p">,</span> <span class="s">&#39;NH&#39;</span><span class="p">,</span> <span class="s">&#39;NJ&#39;</span><span class="p">,</span> <span class="s">&#39;NM&#39;</span><span class="p">,</span> <span class="s">&#39;NY&#39;</span><span class="p">,</span> <span class="s">&#39;NC&#39;</span><span class="p">,</span> <span class="s">&#39;ND&#39;</span><span class="p">,</span> 
-         <span class="s">&#39;OH&#39;</span><span class="p">,</span> <span class="s">&#39;OK&#39;</span><span class="p">,</span> <span class="s">&#39;OR&#39;</span><span class="p">,</span> <span class="s">&#39;PA&#39;</span><span class="p">,</span> <span class="s">&#39;RI&#39;</span><span class="p">,</span> <span class="s">&#39;SC&#39;</span><span class="p">,</span> <span class="s">&#39;SD&#39;</span><span class="p">,</span> <span class="s">&#39;TN&#39;</span><span class="p">,</span> <span class="s">&#39;TX&#39;</span><span class="p">,</span> <span class="s">&#39;UT&#39;</span><span class="p">,</span> <span class="s">&#39;VT&#39;</span><span class="p">,</span> 
+         <span class="s">&#39;IL&#39;</span><span class="p">,</span> <span class="s">&#39;IN&#39;</span><span class="p">,</span> <span class="s">&#39;IA&#39;</span><span class="p">,</span> <span class="s">&#39;KS&#39;</span><span class="p">,</span> <span class="s">&#39;KY&#39;</span><span class="p">,</span> <span class="s">&#39;LA&#39;</span><span class="p">,</span> <span class="s">&#39;ME&#39;</span><span class="p">,</span> <span class="s">&#39;MD&#39;</span><span class="p">,</span> <span class="s">&#39;MA&#39;</span><span class="p">,</span> <span class="s">&#39;MI&#39;</span><span class="p">,</span> <span class="s">&#39;MN&#39;</span><span class="p">,</span>
+         <span class="s">&#39;MS&#39;</span><span class="p">,</span> <span class="s">&#39;MO&#39;</span><span class="p">,</span> <span class="s">&#39;MT&#39;</span><span class="p">,</span> <span class="s">&#39;NE&#39;</span><span class="p">,</span> <span class="s">&#39;NV&#39;</span><span class="p">,</span> <span class="s">&#39;NH&#39;</span><span class="p">,</span> <span class="s">&#39;NJ&#39;</span><span class="p">,</span> <span class="s">&#39;NM&#39;</span><span class="p">,</span> <span class="s">&#39;NY&#39;</span><span class="p">,</span> <span class="s">&#39;NC&#39;</span><span class="p">,</span> <span class="s">&#39;ND&#39;</span><span class="p">,</span>
+         <span class="s">&#39;OH&#39;</span><span class="p">,</span> <span class="s">&#39;OK&#39;</span><span class="p">,</span> <span class="s">&#39;OR&#39;</span><span class="p">,</span> <span class="s">&#39;PA&#39;</span><span class="p">,</span> <span class="s">&#39;RI&#39;</span><span class="p">,</span> <span class="s">&#39;SC&#39;</span><span class="p">,</span> <span class="s">&#39;SD&#39;</span><span class="p">,</span> <span class="s">&#39;TN&#39;</span><span class="p">,</span> <span class="s">&#39;TX&#39;</span><span class="p">,</span> <span class="s">&#39;UT&#39;</span><span class="p">,</span> <span class="s">&#39;VT&#39;</span><span class="p">,</span>
          <span class="s">&#39;VA&#39;</span><span class="p">,</span> <span class="s">&#39;WA&#39;</span><span class="p">,</span> <span class="s">&#39;WV&#39;</span><span class="p">,</span> <span class="s">&#39;WI&#39;</span><span class="p">,</span> <span class="s">&#39;WY&#39;</span><span class="p">]</span>
 
 <span class="c">#Set up dict with Dataset names, Quandl Codes, and empty lists for our data</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Unemployment&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;UR&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]},</span> 
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Unemployment&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;UR&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]},</span>
         <span class="s">&#39;House Price Index&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;Code&#39;</span><span class="p">:</span> <span class="s">&#39;STHPI&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="p">[]}}</span>
 <span class="n">date</span> <span class="o">=</span> <span class="s">&#39;2012-10-01&#39;</span>
 
@@ -44,17 +44,17 @@
 <span class="n">df_list</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">abbvs</span><span class="p">:</span>
-        <span class="c">#Grab our data with the Quandl API </span>
+        <span class="c">#Grab our data with the Quandl API</span>
         <span class="n">quandl_code</span> <span class="o">=</span> <span class="s">&#39;FRED/{0}{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="s">&#39;Code&#39;</span><span class="p">])</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">Quandl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quandl_code</span><span class="p">,</span> 
+        <span class="n">df</span> <span class="o">=</span> <span class="n">Quandl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quandl_code</span><span class="p">,</span>
                         <span class="n">authtoken</span><span class="o">=</span><span class="s">&#39;*******&#39;</span><span class="p">,</span>
                         <span class="n">startdate</span><span class="o">=</span><span class="n">date</span><span class="p">,</span>
                         <span class="n">enddate</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
 
         <span class="c">#The data defaults to date- since I&#39;m only grabbing one month, I would</span>
         <span class="c">#rather have the data category as the (after I transpose) column name</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Value&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">},</span> 
-                       <span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">):</span> <span class="n">key</span><span class="p">})</span>              
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;Value&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">},</span>
+                       <span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">):</span> <span class="n">key</span><span class="p">})</span>
         <span class="n">value</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
     <span class="c">#Take the data for each state, stack them into one dataframe column</span>
@@ -62,7 +62,7 @@
     <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stacked</span>
     <span class="n">df_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stacked</span><span class="p">)</span>
 
-<span class="c">#Turn two single-column &#39;Unemployment&#39; and &#39;House Price Index&#39; df&#39;s into one    </span>
+<span class="c">#Turn two single-column &#39;Unemployment&#39; and &#39;House Price Index&#39; df&#39;s into one</span>
 <span class="n">all_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="o">&gt;&gt;&gt;</span><span class="n">all_data</span>
@@ -120,13 +120,13 @@
 
 
 <p>Lots of NaN in that housing data. Let's plot the unemployment data with Vincent really
-quickly: </p>
+quickly:</p>
 <div class="highlight"><pre><span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">all_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Unemployment&#39;</span><span class="p">])</span>
-<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> 
+<span class="n">vis</span><span class="o">.</span><span class="n">scales</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span>
                    <span class="s">&#39;domain&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="s">&#39;table&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span>
                    <span class="s">&#39;range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;#0b0d11&#39;</span><span class="p">,</span> <span class="s">&#39;#6a7a9d&#39;</span><span class="p">]})</span>
-<span class="n">vis</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span> 
+<span class="n">vis</span> <span class="o">+</span> <span class="p">({</span><span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="s">&#39;field&#39;</span><span class="p">:</span> <span class="s">&#39;data.y&#39;</span><span class="p">},</span> <span class="s">&#39;marks&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">,</span>
        <span class="s">&#39;update&#39;</span><span class="p">,</span> <span class="s">&#39;fill&#39;</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;US States&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s">&#39;Unemployment %&#39;</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -136,20 +136,20 @@ quickly: </p>
 <p><img alt="Unemployment" src="http://farm8.staticflickr.com/7050/8688377072_a4158fd998_z.jpg" /></p>
 <p>Sorry about the small axis labels- I think I need to find a wider blog template (or stop trying to make ordinal plots with 50 items...)</p>
 
-    <div class=twitter>
+<div class=twitter>
 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </div>
-        <p class=tags>This entry was tagged as
-            <a href="/tag/python.html">python</a>
-            <a href="/tag/pandas.html">pandas</a>
-            <a href="/tag/vincent.html">vincent</a>
-            <a href="/tag/data.html">data</a>
-            <a href="/tag/quandl.html">quandl</a>
-          </p>
-            </div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/pandas.html">pandas</a>
+      <a href="/tag/vincent.html">vincent</a>
+      <a href="/tag/data.html">data</a>
+      <a href="/tag/quandl.html">quandl</a>
+    </p>
+        </div>
         
-                    <div class=footer>
+<div class=footer>
   <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
   <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
     <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
@@ -171,8 +171,8 @@ quickly: </p>
       </ul>
     </div>
   </p>
-</div>            </div>
-        <script type="text/javascript">
+</div>    </div>
+    <script type="text/javascript">
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-39972069-1']);
       _gaq.push(['_trackPageview']);
@@ -183,5 +183,5 @@ quickly: </p>
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-      </body>
+  </body>
 </html>

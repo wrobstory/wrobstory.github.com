@@ -12,20 +12,20 @@
   </head>
   <body>
     <div class=container>
-                    
+
       <div class=navigation>
         <ul>
-                      <li><a href="/index.html">Blog</a> </li>
-                      <li><a href="/archives.html">Archive</a> </li>
-                      <li><a href="/tags.html">Tags</a> </li>
-                  </ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
       </div>
-      <div class=separator></div>                
+      <div class=separator></div>        
         <div class=body>
-            <h1 class="title"> Plotting Time Series with Pandas DatetimeIndex and Vincent</h1>
+    <h1 class="title"> Plotting Time Series with Pandas DatetimeIndex and Vincent</h1>
     <p class=date> Sun 21 April 2013</p>
-    <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making plot building simple. </p>
-<p>Here are a few quick, easy examples: </p>
+    <p>The <a href="http://pandas.pydata.org/pandas-docs/dev/timeseries.html">Pandas Time Series/Date tools</a> and <a href="https://github.com/trifacta/vega">Vega</a> visualizations are a great match; Pandas does the heavy lifting of manipulating the data, and the Vega backend creates nicely formatted axes and plots. <a href="https://github.com/wrobstory/vincent">Vincent</a> is the glue that makes the two play nice, and provides a number of conveniences for making plot building simple.</p>
+<p>Here are a few quick, easy examples:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">vincent</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">random</span>
@@ -35,8 +35,8 @@
 <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">))]</span>
 <span class="n">series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">dates</span><span class="p">)</span>
 
-<span class="c">#Create a vincent line plot, and add your data. Vincent handles the translation </span>
-<span class="c">#of Pandas/Python datetimes to javascript epoch time. </span>
+<span class="c">#Create a vincent line plot, and add your data. Vincent handles the translation</span>
+<span class="c">#of Pandas/Python datetimes to javascript epoch time.</span>
 <span class="n">vis</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Line</span><span class="p">()</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;day&#39;</span><span class="p">)</span>
 
@@ -51,10 +51,10 @@
 
 
 <p><img alt="Timeseries" src="http://farm9.staticflickr.com/8533/8668792331_c47f471525_z.jpg" /></p>
-<p>A fully embeddable javascript graph in less than 10 lines of Python- not bad. </p>
-<p>Pandas lets us perform a number of resampling operations on our data: </p>
-<div class="highlight"><pre><span class="c">#Resample to hourly, which can take a lambda function in addition to the </span>
-<span class="c">#standard mean, max, min, etc. </span>
+<p>A fully embeddable javascript graph in less than 10 lines of Python- not bad.</p>
+<p>Pandas lets us perform a number of resampling operations on our data:</p>
+<div class="highlight"><pre><span class="c">#Resample to hourly, which can take a lambda function in addition to the</span>
+<span class="c">#standard mean, max, min, etc.</span>
 <span class="n">half_day</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 12:00:00&#39;</span><span class="p">]</span>
 <span class="n">hourly</span> <span class="o">=</span> <span class="n">half_day</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
 
@@ -69,7 +69,7 @@
 
 
 <p><img alt="Area" src="http://farm9.staticflickr.com/8535/8668790817_63f3ef0e87_z.jpg" /></p>
-<p>We can keep sampling to lower resolutions: </p>
+<p>We can keep sampling to lower resolutions:</p>
 <div class="highlight"><pre><span class="n">half_hour</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s">&#39;4/1/2013 00:00:00&#39;</span><span class="p">:</span><span class="s">&#39;4/1/2013 00:30:00&#39;</span><span class="p">]</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">half_hour</span><span class="p">,</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;minute&#39;</span><span class="p">)</span>
 <span class="n">vis</span><span class="o">.</span><span class="n">axis_label</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s">&#39;Time (Minutes)&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Data vs. Time&#39;</span><span class="p">)</span>
@@ -78,7 +78,7 @@
 
 
 <p><img alt="Downsample" src="http://farm9.staticflickr.com/8530/8668790975_49d1f499c6_z.jpg" /></p>
-<p>Finally, we can plot some real data using a little snippet from the <a href="http://shop.oreilly.com/product/0636920023784.do">Python for Data Analysis</a> book: </p>
+<p>Finally, we can plot some real data using a little snippet from the <a href="http://shop.oreilly.com/product/0636920023784.do">Python for Data Analysis</a> book:</p>
 <div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas.io.data</span> <span class="kn">as</span> <span class="nn">web</span>
 
 <span class="c">#All of the following import code comes from Python for Data Analysis</span>
@@ -90,7 +90,7 @@
 <span class="n">price</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">tic</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Adj Close&#39;</span><span class="p">]</span>
                       <span class="k">for</span> <span class="n">tic</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">all_data</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()})</span>
 
-<span class="c">#Create line graph, with monthly plotting on the axes                       </span>
+<span class="c">#Create line graph, with monthly plotting on the axes</span>
 <span class="n">line</span> <span class="o">=</span> <span class="n">vincent</span><span class="o">.</span><span class="n">Line</span><span class="p">()</span>
 <span class="n">line</span><span class="o">.</span><span class="n">tabular_data</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;AAPL&#39;</span><span class="p">],</span> <span class="n">axis_time</span><span class="o">=</span><span class="s">&#39;month&#39;</span><span class="p">)</span>
 <span class="n">line</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -107,19 +107,19 @@
 
 <p><img alt="AAPL" src="http://farm9.staticflickr.com/8537/8669892378_7ed7103e16_z.jpg" /></p>
 
-    <div class=twitter>
+<div class=twitter>
 <a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </div>
-        <p class=tags>This entry was tagged as
-            <a href="/tag/python.html">python</a>
-            <a href="/tag/pandas.html">pandas</a>
-            <a href="/tag/vincent.html">vincent</a>
-            <a href="/tag/data.html">data</a>
-          </p>
-            </div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/python.html">python</a>
+      <a href="/tag/pandas.html">pandas</a>
+      <a href="/tag/vincent.html">vincent</a>
+      <a href="/tag/data.html">data</a>
+    </p>
+        </div>
         
-                    <div class=footer>
+<div class=footer>
   <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
   <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
     <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
@@ -141,8 +141,8 @@
       </ul>
     </div>
   </p>
-</div>            </div>
-        <script type="text/javascript">
+</div>    </div>
+    <script type="text/javascript">
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-39972069-1']);
       _gaq.push(['_trackPageview']);
@@ -153,5 +153,5 @@
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-      </body>
+  </body>
 </html>
