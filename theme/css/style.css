@@ -1,5 +1,5 @@
 /* general style */
-body    { font: 18px/25px 'Palatino', 'Palatino Linotype', 'Georgia', serif;
+body    { font: 16px/20px 'Palatino', 'Palatino Linotype', 'Georgia', serif;
           margin: 0; padding: 0; }
 a       { /*color: #432165;*/ color: #234764; }
 a:hover { color: #3b185f; background: #f9f8fa; }
@@ -18,11 +18,11 @@ h1                          { font-size: 48px; line-height: 52px; }
 h2                          { font-size: 36px; line-height: 40px; }
 
 /* layout elements */
-div.container               { width: 740px; margin: 48px auto; padding: 0; }
+div.container               { width: 960px; margin: 48px auto; padding: 0; }
 div.header                  { float: left; }
 div.navigation              { float: left; }
-div.navigation a            { text-decoration: none; 
-                              font-size: 22px; 
+div.navigation a            { text-decoration: none;
+                              font-size: 22px;
                               padding: 10px;
                             }
 
@@ -123,9 +123,9 @@ div.blog-epilogue a         {text-decoration: none;
                              padding-left: 30px; padding-right: 30px;}
 
 /* about img */
-img.align-left { 
-    float: left; 
-    margin: 20px; 
+img.align-left {
+    float: left;
+    margin: 20px;
 }
 
 /* github gists */

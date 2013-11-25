@@ -1,0 +1,37 @@
+.point {
+  fill: #2f225d;
+  stroke: #afa2dc;
+}
+
+.selected {
+  fill: #afa2dc;
+  stroke: #2f225d;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.tooltip {
+  font: 12px sans-serif;
+  margin: 0 0 2px 0;
+  padding: 0;
+}
+
+.clear-button {
+  font: 14px sans-serif;
+  cursor: pointer;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}

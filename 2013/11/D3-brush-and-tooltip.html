@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Noticia+Text:400,700' rel='stylesheet' type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title> Cooperative Brushing and Tooltips in D3 | wrobstory.github.io </title>
+
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="/theme/css/font-awesome.css" type="text/css"/>
+    <link rel="stylesheet" href="/css/chart.css" type="text/css" />
+  </head>
+  <body>
+    <div class=container>
+
+      <div class=navigation>
+        <ul>
+            <li><a href="/index.html">Blog</a> </li>
+            <li><a href="/archives.html">Archive</a> </li>
+            <li><a href="/tags.html">Tags</a> </li>
+        </ul>
+      </div>
+      <div class=separator></div>
+        <div class="content">
+    <h1 class="title"> Cooperative Brushing and Tooltips in D3</h1>
+    <p class=date> Sat 23 November 2013</p>
+    <p>Both <a href="https://github.com/mbostock/d3/wiki/SVG-Controls">brushes</a> and tooltips can be an important part of creating dynamic D3 visualizations. This post is going to give an example of how to use both cooperatively, with a solution inspired by Mike Bostock's remarks <a href="https://github.com/mbostock/d3/issues/1604">here</a>.</p>
+<p>First, the <a href="http://bl.ocks.org/wrobstory/7612013">finished product</a> (drag to zoom, hover for tooltip):</p>
+<div class="chart-complete"></div>
+
+<p>The visualization starts with a straightforward <a href="http://bl.ocks.org/wrobstory/7629900">scatterplot</a>, then <a href="https://gist.github.com/wrobstory/7630268">tooltips</a> are added via a pattern derived from Chris Viau's excellent work <a href="http://www.biovisualize.com/2012/07/embedding-d3js-in-blog-post.html">here</a>.</p>
+<p>Next we will introduce a general pattern for dynamically brushing and zooming. First, the brush
+layer is introduced:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">brush</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">svg</span><span class="p">.</span><span class="nx">brush</span><span class="p">()</span>
+ <span class="p">.</span><span class="nx">x</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;brush&quot;</span><span class="p">,</span> <span class="nx">brushmove</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;brushend&quot;</span><span class="p">,</span> <span class="nx">brushend</span><span class="p">);</span>
+
+<span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;brush&quot;</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">brush</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s1">&#39;rect&#39;</span><span class="p">)</span>
+ <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="nx">height</span><span class="p">);</span>
+</pre></div>
+
+
+<p>with some helper functions to manage data and axis transitions on brush:</p>
+<div class="highlight"><pre><span class="kd">function</span> <span class="nx">brushmove</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">extent</span> <span class="o">=</span> <span class="nx">brush</span><span class="p">.</span><span class="nx">extent</span><span class="p">();</span>
+  <span class="nx">points</span><span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s2">&quot;selected&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">is_brushed</span> <span class="o">=</span> <span class="nx">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nx">d</span><span class="p">.</span><span class="nx">index</span> <span class="o">&amp;&amp;</span> <span class="nx">d</span><span class="p">.</span><span class="nx">index</span> <span class="o">&lt;=</span> <span class="nx">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="k">return</span> <span class="nx">is_brushed</span><span class="p">;</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">brushend</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">get_button</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.clear-button&quot;</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">get_button</span><span class="p">.</span><span class="nx">empty</span><span class="p">()</span> <span class="o">===</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">clear_button</span> <span class="o">=</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">460</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">825</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;clear-button&quot;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">text</span><span class="p">(</span><span class="s2">&quot;Clear Brush&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">x</span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="nx">brush</span><span class="p">.</span><span class="nx">extent</span><span class="p">());</span>
+
+  <span class="nx">transition_data</span><span class="p">();</span>
+  <span class="nx">reset_axis</span><span class="p">();</span>
+
+  <span class="nx">points</span><span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s2">&quot;selected&quot;</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+  <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.brush&quot;</span><span class="p">).</span><span class="nx">call</span><span class="p">(</span><span class="nx">brush</span><span class="p">.</span><span class="nx">clear</span><span class="p">());</span>
+
+  <span class="nx">clear_button</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">x</span><span class="p">.</span><span class="nx">domain</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">]);</span>
+    <span class="nx">transition_data</span><span class="p">();</span>
+    <span class="nx">reset_axis</span><span class="p">();</span>
+    <span class="nx">clear_button</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">transition_data</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">svg</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s2">&quot;.point&quot;</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+  <span class="p">.</span><span class="nx">transition</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">duration</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;cx&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">index</span><span class="p">);</span> <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">reset_axis</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">svg</span><span class="p">.</span><span class="nx">transition</span><span class="p">().</span><span class="nx">duration</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.x.axis&quot;</span><span class="p">)</span>
+   <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">xAxis</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>Be careful here: if you append your brush <em>after</em> your data points, the brush overlay will catch all of the pointer events, and your tooltips will <a href="http://bl.ocks.org/wrobstory/7630406">disappear on hover</a>. You want to append the brush before your data points, so that pointer events on the data generate a tooltip, and those on the overlay generate a brush. <a href="http://bl.ocks.org/wrobstory/7630654">See that here.</a></p>
+<p>Now you have another problem: any brushes that start <em>on</em> the data points don't work, because the data/tooltip is catching the pointer event. This might not be an issue for plots with sparse data, but for data-heavy plots you need that event to propagate through to the brush.</p>
+<p>You can solve this by creating your own event and dispatching it to the brush layer:</p>
+<div class="highlight"><pre><span class="nx">points</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">brush_elm</span> <span class="o">=</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;.brush&quot;</span><span class="p">).</span><span class="nx">node</span><span class="p">();</span>
+  <span class="nx">new_click_event</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Event</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">);</span>
+  <span class="nx">new_click_event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span><span class="p">;</span>
+  <span class="nx">new_click_event</span><span class="p">.</span><span class="nx">clientX</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientX</span><span class="p">;</span>
+  <span class="nx">new_click_event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span><span class="p">;</span>
+  <span class="nx">new_click_event</span><span class="p">.</span><span class="nx">clientY</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">clientY</span><span class="p">;</span>
+  <span class="nx">brush_elm</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="nx">new_click_event</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>This final step will result in the chart at the top of this page- notice that you can click anywhere on the chart and have the brush and tooltips work cooperatively. If you don't want tooltips to show up while brushing, try setting <em>pointer-events: none</em> on your data elements in the mousedown function above.</p>
+
+<div class=twitter>
+<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
+    <p class=tags>This entry was tagged as
+      <a href="/tag/brush.html">brush</a>
+      <a href="/tag/tooltip.html">tooltip</a>
+      <a href="/tag/d3.html">D3</a>
+    </p>
+        </div>
+
+<div class=footer>
+  <p>&copy; Copyright <script language="JavaScript">var date = new Date(); document.write(date.getFullYear());</script> by Rob Story</p>
+  <p> Powered by <a href="http://pypi.python.org/pypi/pelican/" target="_blank">Pelican</a>.
+    <a href="https://github.com/fjavieralba/flasky">Theme</a>  by <a href="http://fjavieralba.com">fjavieralba</a>
+  </p>
+  <p>
+    <div class=social style="font-size: 27px;">
+      <ul>
+        <script language="JavaScript">
+          u = '';
+          s = '';
+          document.write('<a href=\"mailto:' + 'wrobstory' + '@' + 'gmail.com' + '\" target=\"_blank\">');
+        </script>
+            <li><i class="icon-envelope icon-large"></i> </li>
+        </a>
+        <a href="http://twitter.com/oceankidbilly" target="_blank"> <li> <i class="icon-twitter-sign icon-large"> </li></i> </a>
+<!--         <a href="www.linkedin.com/pub/rob-story/12/a49/b21"><li><i class="icon-linkedin-sign icon-large" ></i></li></a> -->
+        <a href="http://github.com/wrobstory" target="_blank"> <li> <i class="icon-github-sign icon-large"></i> </li> </a>
+<!--         <a href="/feeds/all.rss.xml" rel="alternate" title="Recent Blog Posts"><li> <i class="icon-rss icon-large"></i> </li></a> -->
+      </ul>
+    </div>
+  </p>
+</div>    </div>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39972069-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="/js/tooltips.js"></script>
+    <script src="/js/chart_complete.js"></script>
+</html>
